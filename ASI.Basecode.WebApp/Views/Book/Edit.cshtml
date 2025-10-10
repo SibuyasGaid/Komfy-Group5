@@ -1,0 +1,80 @@
+﻿@model ASI.Basecode.Services.ServiceModels.BookModel
+
+@{
+    ViewData["Title"] = "Edit Book";
+}
+
+<h1 class="text-3xl font-bold text-gray-800 mb-6">Edit Book</h1>
+
+<div class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+    <form asp-action="Edit" asp-route-id="@Model.BookID" method="post">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly" class="text-red-600 mb-4"></div>
+
+        <input type="hidden" asp-for="BookID" />
+
+        <!-- Title Field -->
+        <div class="mb-4">
+            <label asp-for="Title" class="block text-gray-700 text-sm font-bold mb-2"></label>
+            <input asp-for="Title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+            <span asp-validation-for="Title" class="text-red-500 text-xs italic"></span>
+        </div>
+
+        <!-- BookCode Field -->
+        <div class="mb-4">
+            <label asp-for="BookCode" class="block text-gray-700 text-sm font-bold mb-2"></label>
+            <input asp-for="BookCode" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+            <span asp-validation-for="BookCode" class="text-red-500 text-xs italic"></span>
+        </div>
+
+        <!-- Author Field -->
+        <div class="mb-4">
+            <label asp-for="Author" class="block text-gray-700 text-sm font-bold mb-2"></label>
+            <input asp-for="Author" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+            <span asp-validation-for="Author" class="text-red-500 text-xs italic"></span>
+        </div>
+
+        <!-- Genre Field -->
+        <div class="mb-4">
+            <label asp-for="Genre" class="block text-gray-700 text-sm font-bold mb-2"></label>
+            <input asp-for="Genre" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+            <span asp-validation-for="Genre" class="text-red-500 text-xs italic"></span>
+        </div>
+
+        <!-- Publisher Field -->
+        <div class="mb-4">
+            <label asp-for="Publisher" class="block text-gray-700 text-sm font-bold mb-2"></label>
+            <input asp-for="Publisher" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+            <span asp-validation-for="Publisher" class="text-red-500 text-xs italic"></span>
+        </div>
+
+        <!-- Status Field (Important for library management) -->
+        <div class="mb-6">
+            <label asp-for="Status" class="block text-gray-700 text-sm font-bold mb-2"></label>
+            <select asp-for="Status" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <option value="Available">Available</option>
+                <option value="Borrowed">Borrowed</option>
+                <option value="Maintenance">Maintenance</option>
+            </select>
+            <span asp-validation-for="Status" class="text-red-500 text-xs italic"></span>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex items-center justify-between">
+            <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition duration-150 shadow-md focus:outline-none focus:shadow-outline">
+                Save Changes
+            </button>
+            <a asp-action="Index" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+                Back to List
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+

@@ -1,0 +1,79 @@
+﻿@model List<ASI.Basecode.Services.ServiceModels.BookModel>
+
+@{
+    ViewData["Title"] = "Book Management";
+}
+
+<h1 class="text-3xl font-bold text-gray-800 mb-6">Book Inventory</h1>
+
+<p class="mb-4">
+    <a asp-action="Create" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-150 shadow-md">Add New Book</a>
+</p>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+        <p>@TempData["SuccessMessage"]</p>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+        <p>@TempData["ErrorMessage"]</p>
+    </div>
+}
+
+<div class="overflow-x-auto bg-white rounded-lg shadow-lg">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    @Html.DisplayNameFor(model => model.First().Title)
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    @Html.DisplayNameFor(model => model.First().BookCode)
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    @Html.DisplayNameFor(model => model.First().Author)
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    @Html.DisplayNameFor(model => model.First().Status)
+                </th>
+                <th scope="col" class="relative px-6 py-3">
+                    <span class="sr-only">Actions</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        @Html.DisplayFor(modelItem => item.BookCode)
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        @Html.DisplayFor(modelItem => item.Author)
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full @(item.Status == "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">
+                            @Html.DisplayFor(modelItem => item.Status)
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <a asp-action="Edit" asp-route-id="@item.BookID" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
+
+                        <!-- Delete Form -->
+                        <form asp-action="Delete" asp-route-id="@item.BookID" method="post" onsubmit="return confirm('Are you sure you want to delete this book? This action cannot be undone.');" class="inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
