@@ -13,16 +13,19 @@ namespace ASI.Basecode.Services.Services
         private readonly IBorrowingRepository _borrowingRepository;
         private readonly IBookRepository _bookRepository;
         private readonly IUserRepository _userRepository;
+        private readonly INotificationService _notificationService;
 
-        // Inject repositories
+        // Inject repositories and notification service
         public BorrowingService(
             IBorrowingRepository borrowingRepository,
             IBookRepository bookRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            INotificationService notificationService)
         {
             _borrowingRepository = borrowingRepository;
             _bookRepository = bookRepository;
             _userRepository = userRepository;
+            _notificationService = notificationService;
         }
 
         public List<BorrowingModel> GetAllBorrowings()
@@ -188,6 +191,19 @@ namespace ASI.Basecode.Services.Services
             // Update book status to "Borrowed"
             book.Status = "Borrowed";
             _bookRepository.UpdateBook(book);
+
+            // Increment borrow count for analytics (QUICK WIN #5)
+            _bookRepository.IncrementBorrowCount(book.BookID);
+
+            // QUICK WIN #2: Create notification for successful borrow
+            var notification = new NotificationModel
+            {
+                UserId = model.UserId,
+                Message = $"Successfully borrowed '{book.Title}' (Code: {book.BookCode}). Due date: {model.DueDate:MMM dd, yyyy}",
+                Timestamp = DateTime.Now,
+                IsRead = false
+            };
+            _notificationService.AddNotification(notification);
         }
 
         public void UpdateBorrowing(BorrowingModel model)
@@ -231,6 +247,16 @@ namespace ASI.Basecode.Services.Services
                 book.Status = "Available";
                 _bookRepository.UpdateBook(book);
             }
+
+            // QUICK WIN #2: Create notification for successful return
+            var notification = new NotificationModel
+            {
+                UserId = borrowingEntity.UserId,
+                Message = $"Successfully returned '{book?.Title}' (Code: {book?.BookCode}). Thank you!",
+                Timestamp = DateTime.Now,
+                IsRead = false
+            };
+            _notificationService.AddNotification(notification);
         }
 
         public void MarkAsOverdue(int borrowingId)

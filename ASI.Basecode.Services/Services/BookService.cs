@@ -32,7 +32,14 @@ namespace ASI.Basecode.Services
                 Genre = b.Genre,
                 Author = b.Author,
                 Publisher = b.Publisher,
-                Status = b.Status
+                Status = b.Status,
+                DatePublished = b.DatePublished,
+                Description = b.Description,
+                CoverImagePath = b.CoverImagePath,
+                IsEbook = b.IsEbook,
+                EbookPath = b.EbookPath,
+                ViewCount = b.ViewCount,
+                BorrowCount = b.BorrowCount
             }).ToList();
         }
 
@@ -53,7 +60,14 @@ namespace ASI.Basecode.Services
                 Genre = book.Genre,
                 Author = book.Author,
                 Publisher = book.Publisher,
-                Status = book.Status
+                Status = book.Status,
+                DatePublished = book.DatePublished,
+                Description = book.Description,
+                CoverImagePath = book.CoverImagePath,
+                IsEbook = book.IsEbook,
+                EbookPath = book.EbookPath,
+                ViewCount = book.ViewCount,
+                BorrowCount = book.BorrowCount
             };
         }
 
@@ -73,7 +87,14 @@ namespace ASI.Basecode.Services
                 Genre = model.Genre,
                 Author = model.Author,
                 Publisher = model.Publisher,
-                Status = model.Status
+                Status = model.Status,
+                DatePublished = model.DatePublished,
+                Description = model.Description,
+                CoverImagePath = model.CoverImagePath,
+                IsEbook = model.IsEbook,
+                EbookPath = model.EbookPath,
+                ViewCount = 0,
+                BorrowCount = 0
             };
 
             _bookRepository.AddBook(bookEntity);
@@ -95,6 +116,11 @@ namespace ASI.Basecode.Services
             bookEntity.Author = model.Author;
             bookEntity.Publisher = model.Publisher;
             bookEntity.Status = model.Status;
+            bookEntity.DatePublished = model.DatePublished;
+            bookEntity.Description = model.Description;
+            bookEntity.CoverImagePath = model.CoverImagePath;
+            bookEntity.IsEbook = model.IsEbook;
+            bookEntity.EbookPath = model.EbookPath;
 
             _bookRepository.UpdateBook(bookEntity);
         }
@@ -111,6 +137,123 @@ namespace ASI.Basecode.Services
             // Set the status to deleted (soft delete pattern)
             // For a basic CRUD, we'll use the repository's hard delete for simplicity.
             _bookRepository.DeleteBook(bookEntity);
+        }
+
+        // QUICK WIN #1: Search and Filter Operations
+        public List<BookModel> GetAllBooks()
+        {
+            var books = _bookRepository.GetBooks().ToList();
+
+            return books.Select(b => new BookModel
+            {
+                BookID = b.BookID,
+                Title = b.Title,
+                BookCode = b.BookCode,
+                Genre = b.Genre,
+                Author = b.Author,
+                Publisher = b.Publisher,
+                Status = b.Status,
+                DatePublished = b.DatePublished,
+                Description = b.Description,
+                CoverImagePath = b.CoverImagePath,
+                IsEbook = b.IsEbook,
+                EbookPath = b.EbookPath,
+                ViewCount = b.ViewCount,
+                BorrowCount = b.BorrowCount,
+                AverageRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0,
+                ReviewCount = b.Reviews.Count
+            }).ToList();
+        }
+
+        public BookModel GetBookByCode(string bookCode)
+        {
+            var book = _bookRepository.GetBookByCode(bookCode);
+
+            if (book == null)
+            {
+                return null;
+            }
+
+            return new BookModel
+            {
+                BookID = book.BookID,
+                Title = book.Title,
+                BookCode = book.BookCode,
+                Genre = book.Genre,
+                Author = book.Author,
+                Publisher = book.Publisher,
+                Status = book.Status,
+                DatePublished = book.DatePublished,
+                Description = book.Description,
+                CoverImagePath = book.CoverImagePath,
+                IsEbook = book.IsEbook,
+                EbookPath = book.EbookPath,
+                ViewCount = book.ViewCount,
+                BorrowCount = book.BorrowCount,
+                AverageRating = book.Reviews.Any() ? book.Reviews.Average(r => r.Rating) : 0,
+                ReviewCount = book.Reviews.Count
+            };
+        }
+
+        public List<BookModel> SearchBooks(string searchTerm)
+        {
+            var books = _bookRepository.SearchBooks(searchTerm).ToList();
+
+            return books.Select(b => new BookModel
+            {
+                BookID = b.BookID,
+                Title = b.Title,
+                BookCode = b.BookCode,
+                Genre = b.Genre,
+                Author = b.Author,
+                Publisher = b.Publisher,
+                Status = b.Status,
+                DatePublished = b.DatePublished,
+                Description = b.Description,
+                CoverImagePath = b.CoverImagePath,
+                IsEbook = b.IsEbook,
+                EbookPath = b.EbookPath,
+                ViewCount = b.ViewCount,
+                BorrowCount = b.BorrowCount,
+                AverageRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0,
+                ReviewCount = b.Reviews.Count
+            }).ToList();
+        }
+
+        public List<BookModel> FilterBooks(string genre = null, string author = null, string publisher = null)
+        {
+            var books = _bookRepository.FilterBooks(genre, author, publisher).ToList();
+
+            return books.Select(b => new BookModel
+            {
+                BookID = b.BookID,
+                Title = b.Title,
+                BookCode = b.BookCode,
+                Genre = b.Genre,
+                Author = b.Author,
+                Publisher = b.Publisher,
+                Status = b.Status,
+                DatePublished = b.DatePublished,
+                Description = b.Description,
+                CoverImagePath = b.CoverImagePath,
+                IsEbook = b.IsEbook,
+                EbookPath = b.EbookPath,
+                ViewCount = b.ViewCount,
+                BorrowCount = b.BorrowCount,
+                AverageRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0,
+                ReviewCount = b.Reviews.Count
+            }).ToList();
+        }
+
+        // QUICK WIN #5: Analytics Operations
+        public void IncrementViewCount(int bookId)
+        {
+            _bookRepository.IncrementViewCount(bookId);
+        }
+
+        public void IncrementBorrowCount(int bookId)
+        {
+            _bookRepository.IncrementBorrowCount(bookId);
         }
     }
 }

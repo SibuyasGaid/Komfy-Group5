@@ -28,8 +28,8 @@ namespace ASI.Basecode.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // All explicit Fluent API configuration has been removed.
-            // EF Core will now use the clean definitions in your .cs model files 
-            // to generate the entire schema, including the new six tables 
+            // EF Core will now use the clean definitions in your .cs model files
+            // to generate the entire schema, including the new six tables
             // and all foreign key relationships.
 
             modelBuilder.Entity<UserSetting>(entity =>
@@ -41,6 +41,34 @@ namespace ASI.Basecode.Data
                     .WithOne(u => u.UserSetting)
                     .HasForeignKey<UserSetting>(e => e.UserId);
             });
+
+            // Seed default users
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    UserId = "user",
+                    Name = "Regular User",
+                    Email = "user@komfy.com",
+                    Password = "kQFwF4qT5I8C+TfGr5H8IA==", // Encrypted "user"
+                    Role = "Member",
+                    CreatedBy = "System",
+                    CreatedTime = new DateTime(2025, 1, 1),
+                    UpdatedBy = "System",
+                    UpdatedTime = new DateTime(2025, 1, 1)
+                },
+                new User
+                {
+                    UserId = "admin",
+                    Name = "Administrator",
+                    Email = "admin@komfy.com",
+                    Password = "QpillzkpeKyc+8j/cuKetg==", // Encrypted "admin"
+                    Role = "Admin",
+                    CreatedBy = "System",
+                    CreatedTime = new DateTime(2025, 1, 1),
+                    UpdatedBy = "System",
+                    UpdatedTime = new DateTime(2025, 1, 1)
+                }
+            );
 
             OnModelCreatingPartial(modelBuilder);
         }

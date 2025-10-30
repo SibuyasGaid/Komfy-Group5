@@ -129,5 +129,47 @@ namespace ASI.Basecode.WebApp.Controllers
             }
             return View(user);
         }
+
+        // QUICK WIN #4: POST: /User/GrantAdmin/{id} (UPDATE: Grant admin access)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult GrantAdmin(string id)
+        {
+            try
+            {
+                _userService.GrantAdminAccess(id);
+                TempData["SuccessMessage"] = "Admin access granted successfully.";
+            }
+            catch (KeyNotFoundException)
+            {
+                TempData["ErrorMessage"] = "User not found.";
+            }
+            catch (System.Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error granting admin access: {ex.Message}";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        // QUICK WIN #4: POST: /User/RevokeAdmin/{id} (UPDATE: Revoke admin access)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RevokeAdmin(string id)
+        {
+            try
+            {
+                _userService.RevokeAdminAccess(id);
+                TempData["SuccessMessage"] = "Admin access revoked successfully.";
+            }
+            catch (KeyNotFoundException)
+            {
+                TempData["ErrorMessage"] = "User not found.";
+            }
+            catch (System.Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error revoking admin access: {ex.Message}";
+            }
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

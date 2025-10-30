@@ -119,5 +119,44 @@ namespace ASI.Basecode.WebApp.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+
+        // QUICK WIN #1: Search and Filter Operations
+        // GET: /Book/Search?searchTerm=harry
+        public IActionResult Search(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            var books = _bookService.SearchBooks(searchTerm);
+            ViewBag.SearchTerm = searchTerm;
+            return View("Index", books);
+        }
+
+        // GET: /Book/Filter?genre=Fiction&author=Rowling
+        public IActionResult Filter(string genre, string author, string publisher)
+        {
+            var books = _bookService.FilterBooks(genre, author, publisher);
+            ViewBag.Genre = genre;
+            ViewBag.Author = author;
+            ViewBag.Publisher = publisher;
+            return View("Index", books);
+        }
+
+        // GET: /Book/Details/5 (READ: View book details with reviews and ratings)
+        public IActionResult Details(int id)
+        {
+            var book = _bookService.GetBookDetails(id);
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            // Increment view count when viewing details
+            _bookService.IncrementViewCount(id);
+
+            return View(book);
+        }
     }
 }

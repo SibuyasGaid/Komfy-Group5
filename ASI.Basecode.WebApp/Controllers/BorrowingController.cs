@@ -186,6 +186,22 @@ namespace ASI.Basecode.WebApp.Controllers
             return View(borrowing);
         }
 
+        // QUICK WIN #3: GET: /Borrowing/MyHistory (READ: Current user's borrowing history)
+        public IActionResult MyHistory()
+        {
+            // Get current logged-in user's ID from claims
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["ErrorMessage"] = "You must be logged in to view your borrowing history.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            var borrowings = _borrowingService.GetBorrowingsByUserId(userId);
+            return View("UserBorrowings", borrowings);
+        }
+
         // GET: /Borrowing/UserBorrowings/{userId} (READ: List borrowings by user)
         public IActionResult UserBorrowings(string userId)
         {

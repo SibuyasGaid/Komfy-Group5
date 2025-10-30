@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace ASI.Basecode.Services.ServiceModels
 {
@@ -24,8 +25,31 @@ namespace ASI.Basecode.Services.ServiceModels
         [StringLength(150)]
         public string Publisher { get; set; }
 
-        // We can simplify status to a string for this basic CRUD
         [StringLength(50)]
-        public string Status { get; set; } = "Available"; // Default status for a new book
+        public string Status { get; set; } = "Available"; // Default status
+
+        // Extended Information
+        [DataType(DataType.Date)]
+        public DateTime? DatePublished { get; set; }
+
+        [StringLength(2000)]
+        public string Description { get; set; }
+
+        [StringLength(500)]
+        public string CoverImagePath { get; set; }
+
+        // Ebook Support
+        public bool IsEbook { get; set; } = false;
+
+        [StringLength(500)]
+        public string EbookPath { get; set; }
+
+        // Analytics
+        public int ViewCount { get; set; } = 0;
+        public int BorrowCount { get; set; } = 0;
+
+        // Calculated fields (from Reviews)
+        public double AverageRating { get; set; }
+        public int ReviewCount { get; set; }
     }
 }

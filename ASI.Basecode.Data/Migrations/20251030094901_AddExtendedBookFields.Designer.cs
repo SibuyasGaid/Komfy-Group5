@@ -4,6 +4,7 @@ using ASI.Basecode.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASI.Basecode.Data.Migrations
 {
     [DbContext(typeof(AsiBasecodeDBContext))]
-    partial class AsiBasecodeDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251030094901_AddExtendedBookFields")]
+    partial class AddExtendedBookFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -200,32 +203,6 @@ namespace ASI.Basecode.Data.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = "user",
-                            CreatedBy = "System",
-                            CreatedTime = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "user@komfy.com",
-                            Name = "Regular User",
-                            Password = "kQFwF4qT5I8C+TfGr5H8IA==",
-                            Role = "Member",
-                            UpdatedBy = "System",
-                            UpdatedTime = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            UserId = "admin",
-                            CreatedBy = "System",
-                            CreatedTime = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "admin@komfy.com",
-                            Name = "Administrator",
-                            Password = "QpillzkpeKyc+8j/cuKetg==",
-                            Role = "Admin",
-                            UpdatedBy = "System",
-                            UpdatedTime = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("ASI.Basecode.Data.Models.UserSetting", b =>

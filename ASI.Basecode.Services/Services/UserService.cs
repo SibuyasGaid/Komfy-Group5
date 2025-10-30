@@ -188,5 +188,51 @@ namespace ASI.Basecode.Services.Services
 
             _repository.DeleteUser(userEntity);
         }
+
+        // QUICK WIN #4: Grant Admin Access
+        public void GrantAdminAccess(string userId)
+        {
+            var userEntity = _repository.GetUserById(userId);
+
+            if (userEntity == null)
+            {
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
+            }
+
+            // Only update if user is not already an admin
+            if (userEntity.Role == "Admin")
+            {
+                throw new Exception("User is already an Admin.");
+            }
+
+            userEntity.Role = "Admin";
+            userEntity.UpdatedTime = DateTime.Now;
+            userEntity.UpdatedBy = System.Environment.UserName;
+
+            _repository.UpdateUser(userEntity);
+        }
+
+        // QUICK WIN #4: Revoke Admin Access
+        public void RevokeAdminAccess(string userId)
+        {
+            var userEntity = _repository.GetUserById(userId);
+
+            if (userEntity == null)
+            {
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
+            }
+
+            // Only update if user is currently an admin
+            if (userEntity.Role != "Admin")
+            {
+                throw new Exception("User is not an Admin.");
+            }
+
+            userEntity.Role = "Member";
+            userEntity.UpdatedTime = DateTime.Now;
+            userEntity.UpdatedBy = System.Environment.UserName;
+
+            _repository.UpdateUser(userEntity);
+        }
     }
 }

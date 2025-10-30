@@ -24,5 +24,9 @@ namespace ASI.Basecode.Services.Interfaces
 
         // DELETE operation
         void DeleteUser(string userId);
+
+        // QUICK WIN #4: Admin access management
+        void GrantAdminAccess(string userId);
+        void RevokeAdminAccess(string userId);
     }
 }

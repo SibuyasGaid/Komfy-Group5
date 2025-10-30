@@ -7,7 +7,13 @@ namespace ASI.Basecode.Services.Interfaces
     {
         // READ operations
         List<BookModel> GetAvailableBooks();
+        List<BookModel> GetAllBooks();
         BookModel GetBookDetails(int bookId);
+        BookModel GetBookByCode(string bookCode);
+
+        // SEARCH & FILTER operations (QUICK WIN #1)
+        List<BookModel> SearchBooks(string searchTerm);
+        List<BookModel> FilterBooks(string genre = null, string author = null, string publisher = null);
 
         // CREATE operation
         void AddBook(BookModel model);
@@ -17,5 +23,9 @@ namespace ASI.Basecode.Services.Interfaces
 
         // DELETE operation
         void DeleteBook(int bookId);
+
+        // ANALYTICS operations (QUICK WIN #5)
+        void IncrementViewCount(int bookId);
+        void IncrementBorrowCount(int bookId);
     }
 }
