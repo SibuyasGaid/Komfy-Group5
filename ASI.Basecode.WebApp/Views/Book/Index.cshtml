@@ -38,6 +38,9 @@
                     @Html.DisplayNameFor(model => model.First().Author)
                 </th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    @Html.DisplayNameFor(model => model.First().Description)
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     @Html.DisplayNameFor(model => model.First().Status)
                 </th>
                 <th scope="col" class="relative px-6 py-3">
@@ -57,6 +60,9 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         @Html.DisplayFor(modelItem => item.Author)
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="@item.Description">
+                        @(string.IsNullOrEmpty(item.Description) ? "No description" : (item.Description.Length > 100 ? item.Description.Substring(0, 100) + "..." : item.Description))
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full @(item.Status == "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">
