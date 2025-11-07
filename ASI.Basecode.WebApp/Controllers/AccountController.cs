@@ -171,6 +171,43 @@ namespace ASI.Basecode.WebApp.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Fix default user passwords after migration on new device
+        /// Navigate to /Account/FixPasswords to re-encrypt admin and user passwords
+        /// This is needed when running migrations on a new device due to encryption key differences
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult FixPasswords()
+        {
+            try
+            {
+                // Get the default seeded users
+                var adminUser = _userService.GetUserDetails("admin");
+                var regularUser = _userService.GetUserDetails("user");
+
+                if (adminUser != null)
+                {
+                    // Set plain text password, UpdateUser will encrypt it with the current environment's key
+                    adminUser.Password = "admin";
+                    _userService.UpdateUser(adminUser);
+                }
+
+                if (regularUser != null)
+                {
+                    // Set plain text password, UpdateUser will encrypt it with the current environment's key
+                    regularUser.Password = "user";
+                    _userService.UpdateUser(regularUser);
+                }
+
+                return Content("✅ Passwords fixed successfully!\n\nYou can now login with:\n- Username: admin, Password: admin\n- Username: user, Password: user\n\nGo to /Account/Login to sign in.");
+            }
+            catch (Exception ex)
+            {
+                return Content($"❌ Error fixing passwords: {ex.Message}\n\nPlease check that the database has been migrated and contains the default admin and user accounts.");
+            }
+        }
+
         // CRITICAL FEATURE #1: Forgot Password - Display form
         [HttpGet]
         [AllowAnonymous]
