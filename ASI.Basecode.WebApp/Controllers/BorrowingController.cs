@@ -3,6 +3,7 @@ using ASI.Basecode.Services.ServiceModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 
 namespace ASI.Basecode.WebApp.Controllers
@@ -214,6 +215,45 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             var borrowings = _borrowingService.GetBorrowingsByBookId(bookId);
             return View(borrowings);
+        }
+
+        // POST: /Borrowing/BorrowBook (CREATE: Quick borrow from Books page)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult BorrowBook(int bookId)
+        {
+            try
+            {
+                // Get current logged-in user's ID from claims
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    TempData["ErrorMessage"] = "You must be logged in to borrow a book.";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                // Create a new borrowing record
+                var borrowingModel = new BorrowingModel
+                {
+                    UserId = userId,
+                    BookID = bookId,
+                    BorrowDate = DateTime.Now,
+                    DueDate = DateTime.Now.AddDays(14), // Default 14 days borrowing period
+                    Status = "Active"
+                };
+
+                _borrowingService.AddBorrowing(borrowingModel);
+                TempData["SuccessMessage"] = "Book borrowed successfully! Due date is " + borrowingModel.DueDate.ToString("MMM dd, yyyy");
+
+                return RedirectToAction("Index", "Book");
+            }
+            catch (System.Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error borrowing book: {ex.Message}";
+                _logger.LogError(ex, "Error borrowing book.");
+                return RedirectToAction("Index", "Book");
+            }
         }
     }
 }

@@ -64,6 +64,19 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        @if (item.Status == "Available")
+                        {
+                            <!-- Borrow Form -->
+                            <form asp-controller="Borrowing" asp-action="BorrowBook" asp-route-bookId="@item.BookID" method="post" onsubmit="return confirm('Borrow this book for 14 days?');" class="inline mr-3">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition duration-150">Borrow</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-gray-400 mr-3 px-3 py-1">Unavailable</span>
+                        }
+
                         <a asp-action="Edit" asp-route-id="@item.BookID" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
 
                         <!-- Delete Form -->
