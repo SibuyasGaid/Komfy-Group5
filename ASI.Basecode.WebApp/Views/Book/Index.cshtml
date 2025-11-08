@@ -12,6 +12,29 @@
         </a>
     </div>
 
+    <!-- Search Bar -->
+    <div class="mb-6">
+        <form asp-action="Index" method="get" class="flex gap-2">
+            <div class="flex-1 relative">
+                <input type="text"
+                       name="searchTerm"
+                       value="@ViewBag.SearchTerm"
+                       placeholder="Search by book title or book code..."
+                       class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-150 shadow-md">
+                <i class="fa-solid fa-search mr-2"></i>Search
+            </button>
+            @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+            {
+                <a asp-action="Index" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition duration-150 shadow-md">
+                    <i class="fa-solid fa-times mr-2"></i>Clear
+                </a>
+            }
+        </form>
+    </div>
+
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded" role="alert">
@@ -23,6 +46,17 @@
     {
         <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded" role="alert">
             <p>@TempData["ErrorMessage"]</p>
+        </div>
+    }
+
+    <!-- Search Results Info -->
+    @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+    {
+        <div class="mb-4">
+            <p class="text-gray-600">
+                <i class="fa-solid fa-filter mr-2"></i>
+                Showing <strong>@Model.Count</strong> result(s) for "<strong>@ViewBag.SearchTerm</strong>"
+            </p>
         </div>
     }
 

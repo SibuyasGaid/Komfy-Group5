@@ -22,9 +22,20 @@ namespace ASI.Basecode.WebApp.Controllers
         }
 
         // GET: /Book/Index (READ: List all available books)
-        public IActionResult Index()
+        public IActionResult Index(string searchTerm)
         {
-            var books = _bookService.GetAvailableBooks();
+            List<BookModel> books;
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                books = _bookService.SearchBooks(searchTerm);
+                ViewBag.SearchTerm = searchTerm;
+            }
+            else
+            {
+                books = _bookService.GetAvailableBooks();
+            }
+
             return View(books);
         }
 
