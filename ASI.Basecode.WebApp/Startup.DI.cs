@@ -43,6 +43,7 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<IAnalyticsService, AnalyticsService>(); // ADVANCED FEATURE #1
             this._services.AddScoped<IReportingService, ReportingService>(); // ADVANCED FEATURE #2
             this._services.AddScoped<IRecommendationService, RecommendationService>(); // ADVANCED FEATURE #4
+            this._services.AddScoped<IEmailService, EmailService>(); // Email Service for password reset
 
             // Repositories
             this._services.AddScoped<IUserRepository, UserRepository>();

@@ -27,6 +27,7 @@ namespace ASI.Basecode.WebApp.Controllers
         private readonly TokenProviderOptionsFactory _tokenProviderOptionsFactory;
         private readonly IConfiguration _appConfiguration;
         private readonly IUserService _userService;
+        private readonly IEmailService _emailService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountController"/> class.
@@ -34,6 +35,7 @@ namespace ASI.Basecode.WebApp.Controllers
         /// <param name="signInManager">The sign in manager.</param>
         /// <param name="localizer">The localizer.</param>
         /// <param name="userService">The user service.</param>
+        /// <param name="emailService">The email service.</param>
         /// <param name="httpContextAccessor">The HTTP context accessor.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="configuration">The configuration.</param>
@@ -47,6 +49,7 @@ namespace ASI.Basecode.WebApp.Controllers
                             IConfiguration configuration,
                             IMapper mapper,
                             IUserService userService,
+                            IEmailService emailService,
                             TokenValidationParametersFactory tokenValidationParametersFactory,
                             TokenProviderOptionsFactory tokenProviderOptionsFactory) : base(httpContextAccessor, loggerFactory, configuration, mapper)
         {
@@ -56,6 +59,7 @@ namespace ASI.Basecode.WebApp.Controllers
             this._tokenValidationParametersFactory = tokenValidationParametersFactory;
             this._appConfiguration = configuration;
             this._userService = userService;
+            this._emailService = emailService;
         }
 
         /// <summary>
@@ -220,17 +224,29 @@ namespace ASI.Basecode.WebApp.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public IActionResult ForgotPassword(string email)
+        public async Task<IActionResult> ForgotPassword(string email)
         {
             try
             {
                 var token = _userService.GeneratePasswordResetToken(email);
 
-                // In production, you would send an email with a link like:
-                // https://yoursite.com/Account/ResetPassword?token={token}
-                // For now, we'll display the token in TempData for testing
-                TempData["SuccessMessage"] = $"Password reset token generated. Token: {token}";
-                TempData["ResetToken"] = token;
+                // Generate password reset URL
+                var resetUrl = Url.Action("ResetPassword", "Account", new { token = token }, Request.Scheme);
+
+                // Try to send email, but fallback to showing token if email fails
+                try
+                {
+                    await _emailService.SendPasswordResetEmailAsync(email, token, resetUrl);
+                    TempData["SuccessMessage"] = "Password reset link has been sent to your email.";
+                }
+                catch (Exception emailEx)
+                {
+                    // Email failed, but show token for development/testing
+                    _logger.LogError(emailEx, "Failed to send email. Falling back to showing token.");
+                    TempData["SuccessMessage"] = "Email service unavailable. Use the link below to reset your password.";
+                    TempData["ResetToken"] = token;
+                    TempData["ErrorMessage"] = $"Email Error: {emailEx.Message}";
+                }
 
                 return View("ForgotPasswordConfirmation");
             }
@@ -241,7 +257,7 @@ namespace ASI.Basecode.WebApp.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "An error occurred. Please try again.";
+                TempData["ErrorMessage"] = $"Error: {ex.Message}";
                 _logger.LogError(ex, "Error generating password reset token.");
                 return View();
             }

@@ -197,3 +197,6 @@ $RECYCLE.BIN/
 node_modules
 */src/*/Scripts/**/*.js
 */src/*/Scripts/**/*.js.map
+# Protect sensitive configuration files
+appsettings.Development.json
+**/appsettings.Development.json
