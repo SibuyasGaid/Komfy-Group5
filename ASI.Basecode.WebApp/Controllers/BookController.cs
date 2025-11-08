@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace ASI.Basecode.WebApp.Controllers
 {
-    [AllowAnonymous] // <--- ADD THIS LINE TEMPORARILY TO ALLOW ACCESS TO ALL USERS
+    [Authorize]
     public class BookController : Controller
     {
         private readonly ILogger<BookController> _logger;
@@ -40,12 +40,14 @@ namespace ASI.Basecode.WebApp.Controllers
         }
 
         // GET: /Book/Create (CREATE: Display form)
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
         }
 
         // POST: /Book/Create (CREATE: Process form submission)
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(BookModel model)
@@ -69,6 +71,7 @@ namespace ASI.Basecode.WebApp.Controllers
         }
 
         // GET: /Book/Edit/5 (UPDATE: Display form with existing data)
+        [Authorize(Roles = "Admin")]
         public IActionResult Edit(int id)
         {
             var book = _bookService.GetBookDetails(id);
@@ -80,6 +83,7 @@ namespace ASI.Basecode.WebApp.Controllers
         }
 
         // POST: /Book/Edit/5 (UPDATE: Process form submission)
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, BookModel model)
@@ -111,6 +115,7 @@ namespace ASI.Basecode.WebApp.Controllers
         }
 
         // POST: /Book/Delete/5 (DELETE: Process deletion)
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
