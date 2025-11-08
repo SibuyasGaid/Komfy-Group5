@@ -50,16 +50,19 @@
             </div>
         </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card text-white bg-danger">
-                <div class="card-body text-center">
-                    <i class="fa-solid fa-users fa-3x mb-3"></i>
-                    <h5 class="card-title">Users</h5>
-                    <p class="card-text">Manage library members and admins</p>
-                    <a asp-controller="User" asp-action="Index" class="btn btn-light">View Users</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card text-white bg-danger">
+                    <div class="card-body text-center">
+                        <i class="fa-solid fa-users fa-3x mb-3"></i>
+                        <h5 class="card-title">Users</h5>
+                        <p class="card-text">Manage library members and admins</p>
+                        <a asp-controller="User" asp-action="Index" class="btn btn-light">View Users</a>
+                    </div>
                 </div>
             </div>
-        </div>
+        }
 
         <div class="col-md-4 mb-4">
             <div class="card text-white bg-info">

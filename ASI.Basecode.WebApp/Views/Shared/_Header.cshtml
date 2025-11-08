@@ -31,11 +31,14 @@
                             <i class="fa-solid fa-star"></i> Reviews
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-action="Index" asp-controller="User">
-                            <i class="fa-solid fa-users"></i> Users
-                        </a>
-                    </li>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-action="Index" asp-controller="User">
+                                <i class="fa-solid fa-users"></i> Users
+                            </a>
+                        </li>
+                    }
                     <li class="nav-item">
                         <a class="nav-link" asp-action="Index" asp-controller="Notification">
                             <i class="fa-solid fa-bell"></i> Notifications
