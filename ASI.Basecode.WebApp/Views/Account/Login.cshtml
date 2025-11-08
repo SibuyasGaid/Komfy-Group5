@@ -30,8 +30,13 @@
                                 </div>
                                 <div class="form-outline mb-4">
                                     <label class="form-label" for="form2Example22">@Password</label>
-                                    <input type="password" id="form2Example22" class="form-control"
-                                           asp-for="Password" placeholder="Enter password" />
+                                    <div class="position-relative">
+                                        <input type="password" id="form2Example22" class="form-control"
+                                               asp-for="Password" placeholder="Enter password" />
+                                        <i class="fa-solid fa-eye-slash position-absolute toggle-password"
+                                           style="top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; color: #6c757d;"
+                                           onclick="togglePassword('form2Example22', this)"></i>
+                                    </div>
                                     <span asp-validation-for="Password" class="text-danger"></span>
                                 </div>
                                 <div class="text-center pt-1 mb-5 pb-1 d-flex flex-column align-items-center">
@@ -64,6 +69,22 @@
         var errorMessage = '@TempData["ErrorMessage"]';
         if (errorMessage) {
             toastr.error(errorMessage);
+        }
+
+        // Toggle password visibility
+        function togglePassword(inputId, iconElement) {
+            const passwordInput = document.getElementById(inputId);
+            const icon = iconElement;
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
         }
     </script>
 }

@@ -132,6 +132,7 @@ namespace ASI.Basecode.Services.Services
             {
                 _mapper.Map(model, user);
                 user.Password = PasswordManager.EncryptPassword(model.Password);
+                user.Role = "Member"; // Set default role to Member for new registrations
                 user.CreatedTime = DateTime.Now;
                 user.UpdatedTime = DateTime.Now;
                 user.CreatedBy = System.Environment.UserName;

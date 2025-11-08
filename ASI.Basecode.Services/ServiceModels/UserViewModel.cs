@@ -15,11 +15,18 @@ namespace ASI.Basecode.Services.ServiceModels
         [Required(ErrorMessage = "Name is required.")]
         public string Name { get; set; }
 
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email address.")]
+        public string Email { get; set; }
+
         [Required(ErrorMessage = "Password is required.")]
         public string Password { get; set; }
 
         [Required(ErrorMessage = "Confirmation Password is required.")]
         [Compare("Password", ErrorMessage = "Password and Confirmation Password must match.")]
         public string ConfirmPassword { get; set; }
+
+        // Default role set to Member
+        public string Role { get; set; } = "Member";
     }
 }
