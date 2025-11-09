@@ -82,6 +82,27 @@
                     <p class="text-sm text-gray-600 mb-2">
                         <i class="fa-solid fa-user mr-1"></i>@item.Author
                     </p>
+                    @if (item.ReviewCount > 0)
+                    {
+                        <div class="text-warning text-sm mb-2">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= Math.Floor(item.AverageRating))
+                                {
+                                    <i class="fa-solid fa-star"></i>
+                                }
+                                else if (i <= Math.Ceiling(item.AverageRating))
+                                {
+                                    <i class="fa-solid fa-star-half-stroke"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-regular fa-star"></i>
+                                }
+                            }
+                            <span class="text-gray-600 ml-1">@item.AverageRating.ToString("0.0")</span>
+                        </div>
+                    }
                     <div class="flex justify-between items-center">
                         <span class="px-3 py-1 text-xs font-semibold rounded-full @(item.Status == "Available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">
                             @item.Status
@@ -124,6 +145,36 @@
                                     <div class="mb-3">
                                         <label class="text-sm font-semibold text-gray-600">Author</label>
                                         <p class="text-gray-800">@item.Author</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="text-sm font-semibold text-gray-600">Rating</label>
+                                        <div class="d-flex align-items-center">
+                                            @if (item.ReviewCount > 0)
+                                            {
+                                                <div class="text-warning me-2">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        if (i <= Math.Floor(item.AverageRating))
+                                                        {
+                                                            <i class="fa-solid fa-star"></i>
+                                                        }
+                                                        else if (i <= Math.Ceiling(item.AverageRating))
+                                                        {
+                                                            <i class="fa-solid fa-star-half-stroke"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fa-regular fa-star"></i>
+                                                        }
+                                                    }
+                                                </div>
+                                                <span class="text-gray-700">@item.AverageRating.ToString("0.0") / 5.0 (@item.ReviewCount review@(item.ReviewCount != 1 ? "s" : ""))</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-gray-500">No reviews yet</span>
+                                            }
+                                        </div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="text-sm font-semibold text-gray-600">Description</label>
@@ -228,6 +279,52 @@
                                     </form>
                                 </div>
                             </div>
+
+                            <!-- Reviews Section -->
+                            @{
+                                var allReviews = ViewBag.AllReviews as Dictionary<int, List<ASI.Basecode.Services.ServiceModels.ReviewModel>>;
+                                var bookReviews = allReviews != null && allReviews.ContainsKey(item.BookID) ? allReviews[item.BookID] : new List<ASI.Basecode.Services.ServiceModels.ReviewModel>();
+                            }
+                            @if (bookReviews.Any())
+                            {
+                                <div class="mt-4">
+                                    <h6 class="font-semibold text-gray-700 mb-3">
+                                        <i class="fa-solid fa-comments"></i> Reviews (@bookReviews.Count)
+                                    </h6>
+                                    <div style="max-height: 400px; overflow-y: auto;">
+                                        @foreach (var review in bookReviews.OrderByDescending(r => r.ReviewDate))
+                                        {
+                                            <div class="card mb-3">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <div>
+                                                            <strong class="text-gray-800">@review.UserName</strong>
+                                                            <div class="text-warning">
+                                                                @for (int i = 1; i <= 5; i++)
+                                                                {
+                                                                    if (i <= review.Rating)
+                                                                    {
+                                                                        <i class="fa-solid fa-star"></i>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <i class="fa-regular fa-star"></i>
+                                                                    }
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">@review.ReviewDate.ToString("MMM dd, yyyy")</small>
+                                                    </div>
+                                                    @if (!string.IsNullOrEmpty(review.Comment))
+                                                    {
+                                                        <p class="text-gray-700 mb-0">@review.Comment</p>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
                         </div>
                         <div class="modal-footer">
                             <!-- Review Button/Form -->

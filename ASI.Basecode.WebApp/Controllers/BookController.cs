@@ -13,12 +13,14 @@ namespace ASI.Basecode.WebApp.Controllers
     {
         private readonly ILogger<BookController> _logger;
         private readonly IBookService _bookService;
+        private readonly IReviewService _reviewService;
 
-        // Inject IBookService
-        public BookController(ILogger<BookController> logger, IBookService bookService)
+        // Inject IBookService and IReviewService
+        public BookController(ILogger<BookController> logger, IBookService bookService, IReviewService reviewService)
         {
             _logger = logger;
             _bookService = bookService;
+            _reviewService = reviewService;
         }
 
         // GET: /Book/Index (READ: List all available books)
@@ -35,6 +37,20 @@ namespace ASI.Basecode.WebApp.Controllers
             {
                 books = _bookService.GetAvailableBooks();
             }
+
+            // Populate review data for each book
+            foreach (var book in books)
+            {
+                book.AverageRating = _reviewService.GetAverageRatingForBook(book.BookID);
+                var reviews = _reviewService.GetReviewsByBookId(book.BookID);
+                book.ReviewCount = reviews.Count;
+            }
+
+            // Pass reviews to ViewBag for display in modals
+            ViewBag.AllReviews = books.ToDictionary(
+                b => b.BookID,
+                b => _reviewService.GetReviewsByBookId(b.BookID)
+            );
 
             return View(books);
         }
