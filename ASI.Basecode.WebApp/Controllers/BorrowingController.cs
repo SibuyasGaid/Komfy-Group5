@@ -240,7 +240,7 @@ namespace ASI.Basecode.WebApp.Controllers
         // POST: /Borrowing/BorrowBook (CREATE: Quick borrow from Books page)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult BorrowBook(int bookId)
+        public IActionResult BorrowBook(int bookId, DateTime borrowDate)
         {
             try
             {
@@ -253,18 +253,33 @@ namespace ASI.Basecode.WebApp.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
+                // Validate borrow date is not in the past
+                if (borrowDate.Date < DateTime.Now.Date)
+                {
+                    TempData["ErrorMessage"] = "Borrow date cannot be in the past.";
+                    return RedirectToAction("Index", "Book");
+                }
+
                 // Create a new borrowing record
                 var borrowingModel = new BorrowingModel
                 {
                     UserId = userId,
                     BookID = bookId,
-                    BorrowDate = DateTime.Now,
-                    DueDate = DateTime.Now.AddDays(14), // Default 14 days borrowing period
+                    BorrowDate = borrowDate,
+                    DueDate = borrowDate.AddDays(14), // 14 days borrowing period from selected date
                     Status = "Active"
                 };
 
                 _borrowingService.AddBorrowing(borrowingModel);
-                TempData["SuccessMessage"] = "Book borrowed successfully! Due date is " + borrowingModel.DueDate.ToString("MMM dd, yyyy");
+
+                if (borrowDate.Date == DateTime.Now.Date)
+                {
+                    TempData["SuccessMessage"] = "Book borrowed successfully! Due date is " + borrowingModel.DueDate.ToString("MMM dd, yyyy");
+                }
+                else
+                {
+                    TempData["SuccessMessage"] = "Book reserved successfully! Borrow date: " + borrowingModel.BorrowDate.ToString("MMM dd, yyyy") + ", Due date: " + borrowingModel.DueDate.ToString("MMM dd, yyyy");
+                }
 
                 return RedirectToAction("Index", "Book");
             }
@@ -274,6 +289,54 @@ namespace ASI.Basecode.WebApp.Controllers
                 _logger.LogError(ex, "Error borrowing book.");
                 return RedirectToAction("Index", "Book");
             }
+        }
+
+        // POST: /Borrowing/CancelReservation/{id} (DELETE: Cancel future reservation)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CancelReservation(int id)
+        {
+            try
+            {
+                var borrowing = _borrowingService.GetBorrowingDetails(id);
+
+                if (borrowing == null)
+                {
+                    TempData["ErrorMessage"] = "Borrowing record not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Get current logged-in user's ID from claims
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                // Check if user owns this borrowing (unless they're admin)
+                if (!User.IsInRole("Admin") && borrowing.UserId != userId)
+                {
+                    TempData["ErrorMessage"] = "You can only cancel your own reservations.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Check if borrow date is in the future
+                if (borrowing.BorrowDate.Date < DateTime.Now.Date)
+                {
+                    TempData["ErrorMessage"] = "Cannot cancel reservation - the borrow date has already passed.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Delete the reservation
+                _borrowingService.DeleteBorrowing(id);
+                TempData["SuccessMessage"] = "Reservation cancelled successfully.";
+            }
+            catch (KeyNotFoundException)
+            {
+                TempData["ErrorMessage"] = "Borrowing record not found or already deleted.";
+            }
+            catch (System.Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error cancelling reservation: {ex.Message}";
+                _logger.LogError(ex, "Error cancelling reservation.");
+            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }

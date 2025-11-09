@@ -71,7 +71,13 @@
                                         @borrowing.BookTitle<br/>
                                         <small class="text-muted">Code: @borrowing.BookCode</small>
                                     </td>
-                                    <td>@borrowing.BorrowDate.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        @borrowing.BorrowDate.ToString("MMM dd, yyyy")
+                                        @if (borrowing.BorrowDate.Date > DateTime.Now.Date)
+                                        {
+                                            <br/><span class="badge bg-info text-white">Reserved</span>
+                                        }
+                                    </td>
                                     <td>@borrowing.DueDate.ToString("MMM dd, yyyy")</td>
                                     <td>@(borrowing.ReturnDate?.ToString("MMM dd, yyyy") ?? "Not returned")</td>
                                     <td><span class="badge @statusBadge">@borrowing.Status</span></td>
@@ -80,7 +86,18 @@
                                             <a asp-action="Details" asp-route-id="@borrowing.BorrowingID" class="btn btn-sm btn-info" title="View Details">
                                                 <i class="fa-solid fa-eye"></i>
                                             </a>
-                                            @if (borrowing.Status == "Active" || borrowing.Status == "Overdue")
+                                            @if (borrowing.BorrowDate.Date > DateTime.Now.Date)
+                                            {
+                                                <!-- Cancel Reservation button for future reservations -->
+                                                <form asp-action="CancelReservation" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this reservation?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@borrowing.BorrowingID" />
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Cancel Reservation">
+                                                        <i class="fa-solid fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else if (borrowing.Status == "Active" || borrowing.Status == "Overdue")
                                             {
                                                 <form asp-action="Return" method="post" class="d-inline">
                                                     @Html.AntiForgeryToken()

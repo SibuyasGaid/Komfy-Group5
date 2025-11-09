@@ -199,6 +199,35 @@
                                     </form>
                                 </div>
                             </div>
+
+                            <!-- Borrow Form (Collapsible) -->
+                            <div class="collapse mt-4" id="borrowForm-@item.BookID">
+                                <div class="card card-body bg-light">
+                                    <h6 class="font-semibold text-gray-700 mb-3">Borrow This Book</h6>
+                                    <form asp-controller="Borrowing" asp-action="BorrowBook" asp-route-bookId="@item.BookID" method="post">
+                                        @Html.AntiForgeryToken()
+
+                                        <!-- Borrow Date -->
+                                        <div class="form-group mb-3">
+                                            <label class="text-sm font-semibold text-gray-600">Select Borrow Date <span class="text-red-500">*</span></label>
+                                            <input type="date"
+                                                   name="borrowDate"
+                                                   class="form-control"
+                                                   value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                                   min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                                   required />
+                                            <small class="text-gray-500">You can borrow the book today or reserve it for a future date. Return date will be 2 weeks from the selected date.</small>
+                                        </div>
+
+                                        <!-- Submit Button -->
+                                        <div class="text-right">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="fa-solid fa-book-reader mr-2"></i>Confirm Borrow
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <!-- Review Button/Form -->
@@ -208,12 +237,9 @@
 
                             @if (item.Status == "Available")
                             {
-                                <form asp-controller="Borrowing" asp-action="BorrowBook" asp-route-bookId="@item.BookID" method="post" onsubmit="return confirm('Borrow this book for 14 days?');" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-success">
-                                        <i class="fa-solid fa-book-reader mr-2"></i>Borrow Book
-                                    </button>
-                                </form>
+                                <button type="button" class="btn btn-success" data-toggle="collapse" data-target="#borrowForm-@item.BookID">
+                                    <i class="fa-solid fa-book-reader mr-2"></i>Borrow Book
+                                </button>
                             }
                             else
                             {
