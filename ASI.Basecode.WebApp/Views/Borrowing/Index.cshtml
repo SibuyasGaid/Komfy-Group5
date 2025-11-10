@@ -84,9 +84,6 @@
                                     <td><span class="badge @statusBadge">@borrowing.Status</span></td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a asp-action="Details" asp-route-id="@borrowing.BorrowingID" class="btn btn-sm btn-info" title="View Details">
-                                                <i class="fa-solid fa-eye"></i>
-                                            </a>
                                             @if (borrowing.Status != "Cancelled" && borrowing.BorrowDate.Date > DateTime.Now.Date)
                                             {
                                                 <!-- Cancel Reservation button for future reservations (not already cancelled) -->
@@ -94,7 +91,7 @@
                                                     @Html.AntiForgeryToken()
                                                     <input type="hidden" name="id" value="@borrowing.BorrowingID" />
                                                     <button type="submit" class="btn btn-sm btn-danger" title="Cancel Reservation">
-                                                        <i class="fa-solid fa-times"></i>
+                                                        <i class="fa-solid fa-times"></i> Cancel
                                                     </button>
                                                 </form>
                                             }
@@ -104,15 +101,9 @@
                                                     @Html.AntiForgeryToken()
                                                     <input type="hidden" name="id" value="@borrowing.BorrowingID" />
                                                     <button type="submit" class="btn btn-sm btn-success" title="Return Book">
-                                                        <i class="fa-solid fa-check"></i>
+                                                        <i class="fa-solid fa-check"></i> Return
                                                     </button>
                                                 </form>
-                                            }
-                                            @if (borrowing.Status != "Cancelled")
-                                            {
-                                                <a asp-action="Edit" asp-route-id="@borrowing.BorrowingID" class="btn btn-sm btn-warning" title="Edit">
-                                                    <i class="fa-solid fa-edit"></i>
-                                                </a>
                                             }
                                         </div>
                                     </td>

@@ -1,0 +1,64 @@
+@model ASI.Basecode.Services.ServiceModels.ReviewModel
+
+@{
+    ViewData["Title"] = "Edit Review";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h4><i class="fa-solid fa-edit"></i> Edit Review</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" asp-route-id="@Model.ReviewID" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ReviewID" />
+                        <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" asp-for="BookID" />
+                        <input type="hidden" asp-for="ReviewDate" />
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Book:</strong> @Model.BookTitle</label>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Rating" class="form-label">Rating <span class="text-danger">*</span></label>
+                            <select asp-for="Rating" class="form-select">
+                                <option value="">-- Select Rating --</option>
+                                <option value="5">⭐⭐⭐⭐⭐ (5 - Excellent)</option>
+                                <option value="4">⭐⭐⭐⭐ (4 - Very Good)</option>
+                                <option value="3">⭐⭐⭐ (3 - Good)</option>
+                                <option value="2">⭐⭐ (2 - Fair)</option>
+                                <option value="1">⭐ (1 - Poor)</option>
+                            </select>
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Comment" class="form-label">Comment</label>
+                            <textarea asp-for="Comment" class="form-control" rows="5" placeholder="Update your thoughts about this book..."></textarea>
+                            <span asp-validation-for="Comment" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> Back
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fa-solid fa-save"></i> Update Review
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

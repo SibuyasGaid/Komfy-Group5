@@ -62,15 +62,12 @@
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@notification.NotificationID" />
                                             <button type="submit" class="btn btn-sm btn-success" title="Mark as Read">
-                                                <i class="fa-solid fa-check"></i>
+                                                <i class="fa-solid fa-check"></i> Mark Read
                                             </button>
                                         </form>
                                     }
-                                    <a asp-action="Details" asp-route-id="@notification.NotificationID" class="btn btn-sm btn-info">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </a>
                                     <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@notification.NotificationID">
-                                        <i class="fa-solid fa-trash"></i>
+                                        <i class="fa-solid fa-trash"></i> Delete
                                     </button>
                                 </div>
                             </div>
