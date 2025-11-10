@@ -131,3 +131,25 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Show popup notifications for TempData messages
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <text>
+        if (typeof showNotificationToast === 'function') {
+            showNotificationToast('@TempData["SuccessMessage"]', 'success');
+        }
+        </text>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <text>
+        if (typeof showNotificationToast === 'function') {
+            showNotificationToast('@TempData["ErrorMessage"]', 'danger');
+        }
+        </text>
+    }
+</script>
+</div>

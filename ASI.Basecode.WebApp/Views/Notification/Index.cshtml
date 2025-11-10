@@ -7,9 +7,20 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="fa-solid fa-bell text-info"></i> Notifications</h2>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="fa-solid fa-plus"></i> Create Notification
-        </a>
+        <div>
+            @if (ViewBag.UnreadCount != null && ViewBag.UnreadCount > 0)
+            {
+                <button id="markAllReadPageBtn" class="btn btn-success me-2">
+                    <i class="fa-solid fa-check-double"></i> Mark All as Read
+                </button>
+            }
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i> Create Notification
+                </a>
+            }
+        </div>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
@@ -100,3 +111,36 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var markAllReadBtn = document.getElementById('markAllReadPageBtn');
+        if (markAllReadBtn) {
+            markAllReadBtn.addEventListener('click', function() {
+                var userId = '@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value';
+                if (!userId) return;
+
+                var formData = new FormData();
+                formData.append('userId', userId);
+
+                fetch('@Url.Action("MarkAllAsReadAjax", "Notification")', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload the page to show updated notifications
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error marking notifications as read');
+                });
+            });
+        }
+    });
+</script>

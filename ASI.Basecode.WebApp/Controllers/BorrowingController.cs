@@ -14,13 +14,15 @@ namespace ASI.Basecode.WebApp.Controllers
         private readonly ILogger<BorrowingController> _logger;
         private readonly IBorrowingService _borrowingService;
         private readonly IBookService _bookService;
+        private readonly INotificationService _notificationService;
 
-        // Inject IBorrowingService and IBookService
-        public BorrowingController(ILogger<BorrowingController> logger, IBorrowingService borrowingService, IBookService bookService)
+        // Inject IBorrowingService, IBookService, and INotificationService
+        public BorrowingController(ILogger<BorrowingController> logger, IBorrowingService borrowingService, IBookService bookService, INotificationService notificationService)
         {
             _logger = logger;
             _borrowingService = borrowingService;
             _bookService = bookService;
+            _notificationService = notificationService;
         }
 
         // GET: /Borrowing/Index (READ: List all borrowings)
@@ -142,7 +144,34 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             try
             {
+                // Get borrowing details before returning
+                var borrowing = _borrowingService.GetBorrowingDetails(id);
+                bool wasOverdue = borrowing.Status == "Overdue" || DateTime.Now.Date > borrowing.DueDate.Date;
+
                 _borrowingService.ReturnBook(id);
+
+                // Create notification for book return
+                var book = _bookService.GetBookDetails(borrowing.BookID);
+                string bookTitle = book?.Title ?? "Book";
+                string notificationMessage;
+
+                if (wasOverdue)
+                {
+                    notificationMessage = $"You returned '{bookTitle}' late. Please be mindful of return deadlines to avoid overdue penalties.";
+                }
+                else
+                {
+                    notificationMessage = $"Thank you for returning '{bookTitle}' on time!";
+                }
+
+                _notificationService.AddNotification(new NotificationModel
+                {
+                    UserId = borrowing.UserId,
+                    Message = notificationMessage,
+                    Timestamp = DateTime.Now,
+                    IsRead = false
+                });
+
                 TempData["SuccessMessage"] = "Book returned successfully.";
             }
             catch (KeyNotFoundException)
@@ -163,7 +192,22 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             try
             {
+                // Get borrowing details for notification
+                var borrowing = _borrowingService.GetBorrowingDetails(id);
+                var book = _bookService.GetBookDetails(borrowing.BookID);
+                string bookTitle = book?.Title ?? "Book";
+
                 _borrowingService.MarkAsOverdue(id);
+
+                // Create notification for overdue book
+                _notificationService.AddNotification(new NotificationModel
+                {
+                    UserId = borrowing.UserId,
+                    Message = $"OVERDUE: '{bookTitle}' was due on {borrowing.DueDate:MMM dd, yyyy}. Please return it immediately to avoid further penalties.",
+                    Timestamp = DateTime.Now,
+                    IsRead = false
+                });
+
                 TempData["SuccessMessage"] = "Borrowing marked as overdue.";
             }
             catch (KeyNotFoundException)
@@ -274,14 +318,30 @@ namespace ASI.Basecode.WebApp.Controllers
 
                 _borrowingService.AddBorrowing(borrowingModel);
 
+                // Get book details for notification
+                var book = _bookService.GetBookDetails(bookId);
+                string bookTitle = book?.Title ?? "Book";
+
+                // Create notification for successful borrowing
+                string notificationMessage;
                 if (borrowDate.Date == DateTime.Now.Date)
                 {
+                    notificationMessage = $"You successfully borrowed '{bookTitle}'. Please return it by {borrowingModel.DueDate:MMM dd, yyyy}.";
                     TempData["SuccessMessage"] = "Book borrowed successfully! Due date is " + borrowingModel.DueDate.ToString("MMM dd, yyyy");
                 }
                 else
                 {
+                    notificationMessage = $"You successfully reserved '{bookTitle}' for {borrowingModel.BorrowDate:MMM dd, yyyy}. Return deadline: {borrowingModel.DueDate:MMM dd, yyyy}.";
                     TempData["SuccessMessage"] = "Book reserved successfully! Borrow date: " + borrowingModel.BorrowDate.ToString("MMM dd, yyyy") + ", Due date: " + borrowingModel.DueDate.ToString("MMM dd, yyyy");
                 }
+
+                _notificationService.AddNotification(new NotificationModel
+                {
+                    UserId = userId,
+                    Message = notificationMessage,
+                    Timestamp = DateTime.Now,
+                    IsRead = false
+                });
 
                 return RedirectToAction("Index", "Book");
             }
@@ -339,12 +399,23 @@ namespace ASI.Basecode.WebApp.Controllers
 
                 // Get the book and mark it as available
                 var book = _bookService.GetBookDetails(borrowing.BookID);
+                string bookTitle = book?.Title ?? "Book";
+
                 if (book != null)
                 {
                     book.Status = "Available";
                     book.BorrowCount = Math.Max(0, book.BorrowCount - 1); // Decrement borrow count
                     _bookService.UpdateBook(book);
                 }
+
+                // Create notification for cancelled reservation
+                _notificationService.AddNotification(new NotificationModel
+                {
+                    UserId = borrowing.UserId,
+                    Message = $"You cancelled your reservation for '{bookTitle}'. The book is now available for others to borrow.",
+                    Timestamp = DateTime.Now,
+                    IsRead = false
+                });
 
                 TempData["SuccessMessage"] = "Reservation cancelled successfully. The book is now available.";
             }
