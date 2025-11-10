@@ -615,6 +615,12 @@
                                                                 <i class="fa-solid fa-check mr-1"></i>Returned
                                                             </span>
                                                         }
+                                                        else if (borrowing.Status == "Cancelled")
+                                                        {
+                                                            <span class="badge bg-warning">
+                                                                <i class="fa-solid fa-ban mr-1"></i>Cancelled
+                                                            </span>
+                                                        }
                                                         else if (borrowing.Status == "Overdue")
                                                         {
                                                             <span class="badge bg-danger">

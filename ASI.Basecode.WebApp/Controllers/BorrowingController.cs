@@ -13,12 +13,14 @@ namespace ASI.Basecode.WebApp.Controllers
     {
         private readonly ILogger<BorrowingController> _logger;
         private readonly IBorrowingService _borrowingService;
+        private readonly IBookService _bookService;
 
-        // Inject IBorrowingService
-        public BorrowingController(ILogger<BorrowingController> logger, IBorrowingService borrowingService)
+        // Inject IBorrowingService and IBookService
+        public BorrowingController(ILogger<BorrowingController> logger, IBorrowingService borrowingService, IBookService bookService)
         {
             _logger = logger;
             _borrowingService = borrowingService;
+            _bookService = bookService;
         }
 
         // GET: /Borrowing/Index (READ: List all borrowings)
@@ -323,9 +325,28 @@ namespace ASI.Basecode.WebApp.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Delete the reservation
-                _borrowingService.DeleteBorrowing(id);
-                TempData["SuccessMessage"] = "Reservation cancelled successfully.";
+                // Check if already cancelled
+                if (borrowing.Status == "Cancelled")
+                {
+                    TempData["ErrorMessage"] = "This reservation has already been cancelled.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Mark the reservation as cancelled and set return date
+                borrowing.Status = "Cancelled";
+                borrowing.ReturnDate = DateTime.Now; // Set return date to now
+                _borrowingService.UpdateBorrowing(borrowing);
+
+                // Get the book and mark it as available
+                var book = _bookService.GetBookDetails(borrowing.BookID);
+                if (book != null)
+                {
+                    book.Status = "Available";
+                    book.BorrowCount = Math.Max(0, book.BorrowCount - 1); // Decrement borrow count
+                    _bookService.UpdateBook(book);
+                }
+
+                TempData["SuccessMessage"] = "Reservation cancelled successfully. The book is now available.";
             }
             catch (KeyNotFoundException)
             {

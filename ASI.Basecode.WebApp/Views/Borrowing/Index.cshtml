@@ -59,6 +59,7 @@
                                     "Active" => "bg-success",
                                     "Returned" => "bg-secondary",
                                     "Overdue" => "bg-danger",
+                                    "Cancelled" => "bg-warning",
                                     _ => "bg-primary"
                                 };
                                 <tr>
@@ -86,9 +87,9 @@
                                             <a asp-action="Details" asp-route-id="@borrowing.BorrowingID" class="btn btn-sm btn-info" title="View Details">
                                                 <i class="fa-solid fa-eye"></i>
                                             </a>
-                                            @if (borrowing.BorrowDate.Date > DateTime.Now.Date)
+                                            @if (borrowing.Status != "Cancelled" && borrowing.BorrowDate.Date > DateTime.Now.Date)
                                             {
-                                                <!-- Cancel Reservation button for future reservations -->
+                                                <!-- Cancel Reservation button for future reservations (not already cancelled) -->
                                                 <form asp-action="CancelReservation" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this reservation?');">
                                                     @Html.AntiForgeryToken()
                                                     <input type="hidden" name="id" value="@borrowing.BorrowingID" />
@@ -107,9 +108,12 @@
                                                     </button>
                                                 </form>
                                             }
-                                            <a asp-action="Edit" asp-route-id="@borrowing.BorrowingID" class="btn btn-sm btn-warning" title="Edit">
-                                                <i class="fa-solid fa-edit"></i>
-                                            </a>
+                                            @if (borrowing.Status != "Cancelled")
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@borrowing.BorrowingID" class="btn btn-sm btn-warning" title="Edit">
+                                                    <i class="fa-solid fa-edit"></i>
+                                                </a>
+                                            }
                                         </div>
                                     </td>
                                 </tr>
