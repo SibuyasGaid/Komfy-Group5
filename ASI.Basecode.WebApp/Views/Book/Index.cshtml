@@ -38,6 +38,110 @@
         </form>
     </div>
 
+    <!-- Filters Section -->
+    <div class="mb-6 bg-white rounded-lg shadow-md p-4">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">
+                <i class="fa-solid fa-filter mr-2"></i>Filters
+            </h3>
+            <button type="button" id="toggleFilters" class="text-blue-600 hover:text-blue-700 text-sm">
+                <i class="fa-solid fa-chevron-down" id="filterIcon"></i>
+                <span id="filterText">Show Filters</span>
+            </button>
+        </div>
+
+        <div id="filterSection" style="display: none;">
+            <form asp-action="Index" method="get">
+                <!-- Preserve search term -->
+                <input type="hidden" name="searchTerm" value="@ViewBag.SearchTerm" />
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+                    <!-- Genre Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Genre</label>
+                        <select name="genre" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Genres</option>
+                            @if (ViewBag.Genres != null)
+                            {
+                                foreach (var genre in ViewBag.Genres)
+                                {
+                                    <option value="@genre" selected="@(ViewBag.SelectedGenre == genre)">@genre</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Author Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Author</label>
+                        <select name="author" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Authors</option>
+                            @if (ViewBag.Authors != null)
+                            {
+                                foreach (var author in ViewBag.Authors)
+                                {
+                                    <option value="@author" selected="@(ViewBag.SelectedAuthor == author)">@author</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Publisher Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Publisher</label>
+                        <select name="publisher" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Publishers</option>
+                            @if (ViewBag.Publishers != null)
+                            {
+                                foreach (var publisher in ViewBag.Publishers)
+                                {
+                                    <option value="@publisher" selected="@(ViewBag.SelectedPublisher == publisher)">@publisher</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Year Published Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Year Published</label>
+                        <select name="yearPublished" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Years</option>
+                            @if (ViewBag.Years != null)
+                            {
+                                foreach (var year in ViewBag.Years)
+                                {
+                                    <option value="@year" selected="@(ViewBag.SelectedYear == year)">@year</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Rating Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Min. Rating</label>
+                        <select name="minRating" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Ratings</option>
+                            <option value="4.5" selected="@(ViewBag.SelectedRating == 4.5m)">4.5+ Stars</option>
+                            <option value="4.0" selected="@(ViewBag.SelectedRating == 4.0m)">4.0+ Stars</option>
+                            <option value="3.5" selected="@(ViewBag.SelectedRating == 3.5m)">3.5+ Stars</option>
+                            <option value="3.0" selected="@(ViewBag.SelectedRating == 3.0m)">3.0+ Stars</option>
+                            <option value="2.5" selected="@(ViewBag.SelectedRating == 2.5m)">2.5+ Stars</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-150 shadow-md">
+                        <i class="fa-solid fa-filter mr-2"></i>Apply Filters
+                    </button>
+                    <a asp-action="Index" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition duration-150 shadow-md inline-block">
+                        <i class="fa-solid fa-times mr-2"></i>Clear All Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded" role="alert">
@@ -53,13 +157,62 @@
     }
 
     <!-- Search Results Info -->
-    @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+    @{
+        var hasActiveFilters = !string.IsNullOrEmpty(ViewBag.SearchTerm as string) ||
+                              ViewBag.SelectedGenre != null ||
+                              ViewBag.SelectedAuthor != null ||
+                              ViewBag.SelectedPublisher != null ||
+                              ViewBag.SelectedYear != null ||
+                              ViewBag.SelectedRating != null;
+    }
+    @if (hasActiveFilters)
     {
-        <div class="mb-4">
-            <p class="text-gray-600">
-                <i class="fa-solid fa-filter mr-2"></i>
-                Showing <strong>@Model.Count</strong> result(s) for "<strong>@ViewBag.SearchTerm</strong>"
-            </p>
+        <div class="mb-4 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-700 font-semibold mb-2">
+                        <i class="fa-solid fa-filter mr-2"></i>Active Filters - Showing <strong>@Model.Count</strong> result(s)
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+                        {
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                                <i class="fa-solid fa-search mr-1"></i> @ViewBag.SearchTerm
+                            </span>
+                        }
+                        @if (ViewBag.SelectedGenre != null)
+                        {
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-800">
+                                <i class="fa-solid fa-bookmark mr-1"></i> Genre: @ViewBag.SelectedGenre
+                            </span>
+                        }
+                        @if (ViewBag.SelectedAuthor != null)
+                        {
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                                <i class="fa-solid fa-user mr-1"></i> Author: @ViewBag.SelectedAuthor
+                            </span>
+                        }
+                        @if (ViewBag.SelectedPublisher != null)
+                        {
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800">
+                                <i class="fa-solid fa-building mr-1"></i> Publisher: @ViewBag.SelectedPublisher
+                            </span>
+                        }
+                        @if (ViewBag.SelectedYear != null)
+                        {
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-100 text-red-800">
+                                <i class="fa-solid fa-calendar mr-1"></i> Year: @ViewBag.SelectedYear
+                            </span>
+                        }
+                        @if (ViewBag.SelectedRating != null)
+                        {
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-orange-100 text-orange-800">
+                                <i class="fa-solid fa-star mr-1"></i> Rating: @ViewBag.SelectedRating+
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
     }
 
@@ -427,3 +580,35 @@
         color: #ffc107;
     }
 </style>
+
+<script>
+    // Filter toggle functionality
+    document.getElementById('toggleFilters').addEventListener('click', function() {
+        var filterSection = document.getElementById('filterSection');
+        var filterIcon = document.getElementById('filterIcon');
+        var filterText = document.getElementById('filterText');
+
+        if (filterSection.style.display === 'none') {
+            filterSection.style.display = 'block';
+            filterIcon.classList.remove('fa-chevron-down');
+            filterIcon.classList.add('fa-chevron-up');
+            filterText.textContent = 'Hide Filters';
+        } else {
+            filterSection.style.display = 'none';
+            filterIcon.classList.remove('fa-chevron-up');
+            filterIcon.classList.add('fa-chevron-down');
+            filterText.textContent = 'Show Filters';
+        }
+    });
+
+    // Auto-expand filters if any filter is active
+    @if (ViewBag.SelectedGenre != null || ViewBag.SelectedAuthor != null || ViewBag.SelectedPublisher != null || ViewBag.SelectedYear != null || ViewBag.SelectedRating != null)
+    {
+        <text>
+        document.getElementById('filterSection').style.display = 'block';
+        document.getElementById('filterIcon').classList.remove('fa-chevron-down');
+        document.getElementById('filterIcon').classList.add('fa-chevron-up');
+        document.getElementById('filterText').textContent = 'Hide Filters';
+        </text>
+    }
+</script>

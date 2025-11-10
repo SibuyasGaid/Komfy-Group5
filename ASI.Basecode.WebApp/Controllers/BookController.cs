@@ -24,7 +24,7 @@ namespace ASI.Basecode.WebApp.Controllers
         }
 
         // GET: /Book/Index (READ: List all available books)
-        public IActionResult Index(string searchTerm)
+        public IActionResult Index(string searchTerm, string genre, string author, string publisher, int? yearPublished, decimal? minRating)
         {
             List<BookModel> books;
 
@@ -45,6 +45,44 @@ namespace ASI.Basecode.WebApp.Controllers
                 var reviews = _reviewService.GetReviewsByBookId(book.BookID);
                 book.ReviewCount = reviews.Count;
             }
+
+            // Apply filters
+            if (!string.IsNullOrWhiteSpace(genre))
+            {
+                books = books.Where(b => b.Genre != null && b.Genre.Equals(genre, System.StringComparison.OrdinalIgnoreCase)).ToList();
+                ViewBag.SelectedGenre = genre;
+            }
+
+            if (!string.IsNullOrWhiteSpace(author))
+            {
+                books = books.Where(b => b.Author != null && b.Author.Equals(author, System.StringComparison.OrdinalIgnoreCase)).ToList();
+                ViewBag.SelectedAuthor = author;
+            }
+
+            if (!string.IsNullOrWhiteSpace(publisher))
+            {
+                books = books.Where(b => b.Publisher != null && b.Publisher.Equals(publisher, System.StringComparison.OrdinalIgnoreCase)).ToList();
+                ViewBag.SelectedPublisher = publisher;
+            }
+
+            if (yearPublished.HasValue)
+            {
+                books = books.Where(b => b.DatePublished.HasValue && b.DatePublished.Value.Year == yearPublished.Value).ToList();
+                ViewBag.SelectedYear = yearPublished.Value;
+            }
+
+            if (minRating.HasValue)
+            {
+                books = books.Where(b => b.AverageRating >= (double)minRating.Value).ToList();
+                ViewBag.SelectedRating = minRating.Value;
+            }
+
+            // Get unique values for filter dropdowns (from all books)
+            var allBooks = _bookService.GetAvailableBooks();
+            ViewBag.Genres = allBooks.Where(b => !string.IsNullOrWhiteSpace(b.Genre)).Select(b => b.Genre).Distinct().OrderBy(g => g).ToList();
+            ViewBag.Authors = allBooks.Where(b => !string.IsNullOrWhiteSpace(b.Author)).Select(b => b.Author).Distinct().OrderBy(a => a).ToList();
+            ViewBag.Publishers = allBooks.Where(b => !string.IsNullOrWhiteSpace(b.Publisher)).Select(b => b.Publisher).Distinct().OrderBy(p => p).ToList();
+            ViewBag.Years = allBooks.Where(b => b.DatePublished.HasValue).Select(b => b.DatePublished.Value.Year).Distinct().OrderByDescending(y => y).ToList();
 
             // Pass reviews to ViewBag for display in modals
             ViewBag.AllReviews = books.ToDictionary(
