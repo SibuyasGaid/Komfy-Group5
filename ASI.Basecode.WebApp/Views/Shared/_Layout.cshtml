@@ -12,6 +12,137 @@
     <link rel="stylesheet" href="~/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     @RenderSection("Styles", required: false)
+
+    <!-- Dark Mode Styles -->
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f3f4f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --card-bg: #ffffff;
+            --navbar-bg: #ffffff;
+            --footer-bg: #f8f9fa;
+        }
+
+        html.dark-theme {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --border-color: #374151;
+            --card-bg: #252525;
+            --navbar-bg: #1f1f1f;
+            --footer-bg: #1a1a1a;
+        }
+
+        html.dark-theme body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        html.dark-theme .bg-white {
+            background-color: var(--card-bg) !important;
+            color: var(--text-primary);
+        }
+
+        html.dark-theme .text-gray-800,
+        html.dark-theme .text-gray-700,
+        html.dark-theme .text-gray-600 {
+            color: var(--text-primary) !important;
+        }
+
+        html.dark-theme .text-gray-500 {
+            color: var(--text-secondary) !important;
+        }
+
+        html.dark-theme .border,
+        html.dark-theme .border-gray-300,
+        html.dark-theme .border-gray-200 {
+            border-color: var(--border-color) !important;
+        }
+
+        html.dark-theme input,
+        html.dark-theme textarea,
+        html.dark-theme select {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        html.dark-theme input:disabled,
+        html.dark-theme textarea:disabled,
+        html.dark-theme select:disabled {
+            background-color: #1f1f1f;
+            color: var(--text-secondary);
+        }
+
+        html.dark-theme .card {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        html.dark-theme .card-header {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        html.dark-theme .bg-gray-100 {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        html.dark-theme .bg-gray-50 {
+            background-color: #2a2a2a !important;
+        }
+
+        html.dark-theme .modal-content {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        html.dark-theme .modal-header,
+        html.dark-theme .modal-footer {
+            border-color: var(--border-color);
+        }
+
+        html.dark-theme .list-group-item {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        html.dark-theme footer {
+            background-color: var(--footer-bg);
+            color: var(--text-secondary);
+            border-color: var(--border-color);
+        }
+
+        html.dark-theme .navbar {
+            background-color: var(--navbar-bg) !important;
+        }
+
+        html.dark-theme .navbar-light .navbar-nav .nav-link {
+            color: var(--text-primary) !important;
+        }
+
+        /* Smooth transitions */
+        body, .bg-white, .card, input, textarea, select, .modal-content {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+    </style>
+
+    <!-- Theme Initialization Script (runs before page render) -->
+    <script>
+        (function() {
+            // Get theme from cookie
+            const theme = document.cookie.split('; ').find(row => row.startsWith('theme='));
+            if (theme && theme.split('=')[1] === 'dark') {
+                document.documentElement.classList.add('dark-theme');
+            }
+        })();
+    </script>
 </head>
 <body>
     @Html.Partial("_Header")

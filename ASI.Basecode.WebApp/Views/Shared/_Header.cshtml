@@ -45,6 +45,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" asp-action="Index" asp-controller="Profile">
+                            <i class="fa-solid fa-user-circle"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link text-danger" asp-action="Logout" asp-controller="Account">
                             <i class="fa-solid fa-right-from-bracket"></i> Logout
                         </a>
@@ -56,6 +61,11 @@
                             <i class="fa-solid fa-user"></i> @(HttpContextAccessor.HttpContext.Session.GetString("UserName") ?? "User")
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li>
+                                <a class="dropdown-item" asp-action="Index" asp-controller="Profile">
+                                    <i class="fa-solid fa-user-circle"></i> My Profile
+                                </a>
+                            </li>
                             <li>
                                 <a class="dropdown-item" asp-action="Index" asp-controller="UserSetting">
                                     <i class="fa-solid fa-gear"></i> Settings

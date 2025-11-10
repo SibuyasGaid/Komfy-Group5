@@ -1,0 +1,294 @@
+@model ASI.Basecode.Services.ServiceModels.UserModel
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            <i class="fa-solid fa-user-circle mr-2"></i>My Profile
+        </h1>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded" role="alert">
+                <p><i class="fa-solid fa-check-circle mr-2"></i>@TempData["SuccessMessage"]</p>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded" role="alert">
+                <p><i class="fa-solid fa-exclamation-circle mr-2"></i>@TempData["ErrorMessage"]</p>
+            </div>
+        }
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Left Sidebar -->
+            <div class="md:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="text-center mb-6">
+                        <div class="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full mx-auto flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-user text-white text-4xl"></i>
+                        </div>
+                        <h3 class="font-bold text-xl text-gray-800">@Model.Name</h3>
+                        <p class="text-gray-600 text-sm">@Model.Email</p>
+                        <span class="inline-block mt-2 px-3 py-1 rounded-full text-sm @(Model.Role == "Admin" ? "bg-red-100 text-red-800" : "bg-blue-100 text-blue-800")">
+                            <i class="fa-solid @(Model.Role == "Admin" ? "fa-crown" : "fa-user") mr-1"></i>@Model.Role
+                        </span>
+                    </div>
+
+                    <div class="border-t pt-4">
+                        <ul class="space-y-2">
+                            <li>
+                                <a href="#account-details" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition profile-tab active">
+                                    <i class="fa-solid fa-user mr-2"></i>Account Details
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#change-password" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition profile-tab">
+                                    <i class="fa-solid fa-lock mr-2"></i>Change Password
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#theme-settings" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded transition profile-tab">
+                                    <i class="fa-solid fa-palette mr-2"></i>Theme Settings
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="md:col-span-2">
+                <!-- Account Details Section -->
+                <div id="account-details-section" class="profile-section">
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                            <i class="fa-solid fa-user mr-2"></i>Account Details
+                        </h2>
+
+                        <form asp-action="UpdateProfile" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">User ID</label>
+                                <input type="text" value="@Model.UserId" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed" disabled />
+                                <small class="text-gray-500">User ID cannot be changed</small>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Full Name <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="name" value="@Model.Name" required
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Email Address <span class="text-red-500">*</span>
+                                </label>
+                                <input type="email" name="email" value="@Model.Email" required
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Role</label>
+                                <input type="text" value="@Model.Role" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed" disabled />
+                                <small class="text-gray-500">Role can only be changed by administrators</small>
+                            </div>
+
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-150 shadow-md">
+                                    <i class="fa-solid fa-save mr-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Change Password Section -->
+                <div id="change-password-section" class="profile-section" style="display: none;">
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                            <i class="fa-solid fa-lock mr-2"></i>Change Password
+                        </h2>
+
+                        <form asp-action="ChangePassword" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Current Password <span class="text-red-500">*</span>
+                                </label>
+                                <input type="password" name="currentPassword" required
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    New Password <span class="text-red-500">*</span>
+                                </label>
+                                <input type="password" name="newPassword" required minlength="6"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                <small class="text-gray-500">Minimum 6 characters</small>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Confirm New Password <span class="text-red-500">*</span>
+                                </label>
+                                <input type="password" name="confirmPassword" required minlength="6"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-150 shadow-md">
+                                    <i class="fa-solid fa-key mr-2"></i>Change Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Theme Settings Section -->
+                <div id="theme-settings-section" class="profile-section" style="display: none;">
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                            <i class="fa-solid fa-palette mr-2"></i>Theme Settings
+                        </h2>
+
+                        <p class="text-gray-600 mb-6">Choose your preferred theme for the application</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Light Theme -->
+                            <div class="border-2 rounded-lg p-4 cursor-pointer theme-option hover:border-blue-500 transition @(ViewBag.CurrentTheme == "light" ? "border-blue-500 bg-blue-50" : "border-gray-300")" data-theme="light">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-bold text-lg">Light Mode</h3>
+                                    <i class="fa-solid fa-sun text-yellow-500 text-2xl"></i>
+                                </div>
+                                <div class="bg-white border border-gray-200 rounded p-3 mb-3">
+                                    <div class="h-2 bg-gray-200 rounded mb-2"></div>
+                                    <div class="h-2 bg-gray-300 rounded w-2/3"></div>
+                                </div>
+                                <p class="text-sm text-gray-600">Classic bright theme with white backgrounds</p>
+                            </div>
+
+                            <!-- Dark Theme -->
+                            <div class="border-2 rounded-lg p-4 cursor-pointer theme-option hover:border-blue-500 transition @(ViewBag.CurrentTheme == "dark" ? "border-blue-500 bg-blue-50" : "border-gray-300")" data-theme="dark">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-bold text-lg">Dark Mode</h3>
+                                    <i class="fa-solid fa-moon text-indigo-500 text-2xl"></i>
+                                </div>
+                                <div class="bg-gray-800 border border-gray-700 rounded p-3 mb-3">
+                                    <div class="h-2 bg-gray-600 rounded mb-2"></div>
+                                    <div class="h-2 bg-gray-500 rounded w-2/3"></div>
+                                </div>
+                                <p class="text-sm text-gray-600">Easy on the eyes with dark backgrounds</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+                            <p class="text-sm text-gray-700">
+                                <i class="fa-solid fa-info-circle mr-2"></i>
+                                Your theme preference will be saved and applied across all pages.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Info -->
+                <div class="bg-gray-100 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-700 mb-2">
+                        <i class="fa-solid fa-info-circle mr-2"></i>Account Information
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                        <div>
+                            <strong>Created:</strong> @Model.CreatedTime.ToString("MMM dd, yyyy")
+                        </div>
+                        <div>
+                            <strong>Last Updated:</strong> @Model.UpdatedTime.ToString("MMM dd, yyyy")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab switching
+    document.querySelectorAll('.profile-tab').forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active', 'bg-gray-100'));
+
+            // Add active class to clicked tab
+            this.classList.add('active', 'bg-gray-100');
+
+            // Hide all sections
+            document.querySelectorAll('.profile-section').forEach(section => section.style.display = 'none');
+
+            // Show selected section
+            const targetId = this.getAttribute('href').substring(1) + '-section';
+            document.getElementById(targetId).style.display = 'block';
+        });
+    });
+
+    // Theme switching
+    document.querySelectorAll('.theme-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const selectedTheme = this.getAttribute('data-theme');
+
+            // Update UI
+            document.querySelectorAll('.theme-option').forEach(opt => {
+                opt.classList.remove('border-blue-500', 'bg-blue-50');
+                opt.classList.add('border-gray-300');
+            });
+            this.classList.remove('border-gray-300');
+            this.classList.add('border-blue-500', 'bg-blue-50');
+
+            // Save theme preference
+            const formData = new FormData();
+            formData.append('theme', selectedTheme);
+
+            fetch('@Url.Action("SetTheme", "Profile")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Apply theme immediately
+                    if (selectedTheme === 'dark') {
+                        document.documentElement.classList.add('dark-theme');
+                    } else {
+                        document.documentElement.classList.remove('dark-theme');
+                    }
+
+                    // Show success message
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                    successDiv.innerHTML = '<i class="fa-solid fa-check-circle mr-2"></i>Theme changed successfully!';
+                    document.body.appendChild(successDiv);
+
+                    setTimeout(() => {
+                        successDiv.remove();
+                    }, 3000);
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .profile-tab.active {
+        background-color: #f3f4f6;
+        font-weight: 600;
+    }
+</style>
