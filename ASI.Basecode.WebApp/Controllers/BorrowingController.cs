@@ -49,12 +49,50 @@ namespace ASI.Basecode.WebApp.Controllers
                 borrowings = _borrowingService.GetBorrowingsByUserId(userId);
             }
 
+            // Automatically mark overdue borrowings
+            var now = DateTime.Now;
+            foreach (var borrowing in borrowings)
+            {
+                if (borrowing.Status == "Active" && borrowing.DueDate < now)
+                {
+                    try
+                    {
+                        _borrowingService.MarkAsOverdue(borrowing.BorrowingID);
+                        borrowing.Status = "Overdue"; // Update the model for immediate display
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error marking borrowing {borrowing.BorrowingID} as overdue");
+                    }
+                }
+            }
+
             return View(borrowings);
         }
 
         // GET: /Borrowing/Active (READ: List active borrowings)
         public IActionResult Active()
         {
+            // First, mark any overdue borrowings that are still "Active"
+            var allActiveBorrowings = _borrowingService.GetActiveBorrowings();
+            var now = DateTime.Now;
+
+            foreach (var borrowing in allActiveBorrowings)
+            {
+                if (borrowing.Status == "Active" && borrowing.DueDate < now)
+                {
+                    try
+                    {
+                        _borrowingService.MarkAsOverdue(borrowing.BorrowingID);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error marking borrowing {borrowing.BorrowingID} as overdue");
+                    }
+                }
+            }
+
+            // Now get the truly active borrowings (not overdue)
             var borrowings = _borrowingService.GetActiveBorrowings();
             return View(borrowings);
         }
@@ -62,6 +100,26 @@ namespace ASI.Basecode.WebApp.Controllers
         // GET: /Borrowing/Overdue (READ: List overdue borrowings)
         public IActionResult Overdue()
         {
+            // First, mark any overdue borrowings that are still "Active"
+            var allActiveBorrowings = _borrowingService.GetActiveBorrowings();
+            var now = DateTime.Now;
+
+            foreach (var borrowing in allActiveBorrowings)
+            {
+                if (borrowing.Status == "Active" && borrowing.DueDate < now)
+                {
+                    try
+                    {
+                        _borrowingService.MarkAsOverdue(borrowing.BorrowingID);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error marking borrowing {borrowing.BorrowingID} as overdue");
+                    }
+                }
+            }
+
+            // Now get the overdue borrowings
             var borrowings = _borrowingService.GetOverdueBorrowings();
             return View(borrowings);
         }

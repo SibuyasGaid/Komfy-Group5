@@ -45,6 +45,9 @@ namespace ASI.Basecode.WebApp
             this._services.AddScoped<IRecommendationService, RecommendationService>(); // ADVANCED FEATURE #4
             this._services.AddScoped<IEmailService, EmailService>(); // Email Service for password reset
 
+            // Background Services
+            this._services.AddHostedService<OverdueNotificationService>(); // Background service for overdue email notifications
+
             // Repositories
             this._services.AddScoped<IUserRepository, UserRepository>();
             this._services.AddScoped<IBookRepository, BookRepository>();
