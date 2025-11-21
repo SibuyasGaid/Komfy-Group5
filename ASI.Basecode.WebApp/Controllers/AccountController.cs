@@ -88,6 +88,15 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             this._session.SetString("HasSession", "Exist");
 
+            // Check whether the account exists and is active first so we can show a clearer message
+            var existingUser = _userService.GetUserDetails(model.UserId);
+            if (existingUser != null && !existingUser.IsUserActive)
+            {
+                ModelState.AddModelError(string.Empty, "Account is deactivated. Please contact an administrator.");
+                TempData["ErrorMessage"] = "Account is deactivated. Please contact an administrator.";
+                return View(model);
+            }
+
             User user = null;
 
             var loginResult = _userService.AuthenticateUser(model.UserId, model.Password, ref user);
