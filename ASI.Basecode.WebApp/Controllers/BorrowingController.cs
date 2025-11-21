@@ -217,34 +217,7 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             try
             {
-                // Get borrowing details before returning
-                var borrowing = _borrowingService.GetBorrowingDetails(id);
-                bool wasOverdue = borrowing.Status == "Overdue" || DateTime.Now.Date > borrowing.DueDate.Date;
-
                 _borrowingService.ReturnBook(id);
-
-                // Create notification for book return
-                var book = _bookService.GetBookDetails(borrowing.BookID);
-                string bookTitle = book?.Title ?? "Book";
-                string notificationMessage;
-
-                if (wasOverdue)
-                {
-                    notificationMessage = $"You returned '{bookTitle}' late. Please be mindful of return deadlines to avoid overdue penalties.";
-                }
-                else
-                {
-                    notificationMessage = $"Thank you for returning '{bookTitle}' on time!";
-                }
-
-                _notificationService.AddNotification(new NotificationModel
-                {
-                    UserId = borrowing.UserId,
-                    Message = notificationMessage,
-                    Timestamp = DateTime.Now,
-                    IsRead = false
-                });
-
                 TempData["SuccessMessage"] = "Book returned successfully.";
             }
             catch (KeyNotFoundException)
@@ -391,30 +364,15 @@ namespace ASI.Basecode.WebApp.Controllers
 
                 _borrowingService.AddBorrowing(borrowingModel);
 
-                // Get book details for notification
-                var book = _bookService.GetBookDetails(bookId);
-                string bookTitle = book?.Title ?? "Book";
-
-                // Create notification for successful borrowing
-                string notificationMessage;
+                // Set success message based on borrow date
                 if (borrowDate.Date == DateTime.Now.Date)
                 {
-                    notificationMessage = $"You successfully borrowed '{bookTitle}'. Please return it by {borrowingModel.DueDate:MMM dd, yyyy}.";
                     TempData["SuccessMessage"] = "Book borrowed successfully! Due date is " + borrowingModel.DueDate.ToString("MMM dd, yyyy");
                 }
                 else
                 {
-                    notificationMessage = $"You successfully reserved '{bookTitle}' for {borrowingModel.BorrowDate:MMM dd, yyyy}. Return deadline: {borrowingModel.DueDate:MMM dd, yyyy}.";
                     TempData["SuccessMessage"] = "Book reserved successfully! Borrow date: " + borrowingModel.BorrowDate.ToString("MMM dd, yyyy") + ", Due date: " + borrowingModel.DueDate.ToString("MMM dd, yyyy");
                 }
-
-                _notificationService.AddNotification(new NotificationModel
-                {
-                    UserId = userId,
-                    Message = notificationMessage,
-                    Timestamp = DateTime.Now,
-                    IsRead = false
-                });
 
                 return RedirectToAction("Index", "Book");
             }
