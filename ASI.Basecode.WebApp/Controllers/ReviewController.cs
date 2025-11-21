@@ -78,20 +78,21 @@ namespace ASI.Basecode.WebApp.Controllers
                     _reviewService.AddReview(model);
                     TempData["SuccessMessage"] = "Review added successfully.";
 
-                    // Redirect back to Books page
-                    return RedirectToAction("Index", "Book");
+                    // Redirect back to the same book details page
+                    return RedirectToAction("Details", "Book", new { id = model.BookID });
                 }
                 catch (System.Exception ex)
                 {
                     // Add model error if business logic fails
                     TempData["ErrorMessage"] = $"Error adding review: {ex.Message}";
                     _logger.LogError(ex, "Error adding review.");
-                    return RedirectToAction("Index", "Book");
+                    return RedirectToAction("Details", "Book", new { id = model.BookID });
                 }
             }
 
+            // If ModelState is invalid (e.g., no rating selected), redirect back to the book details page
             TempData["ErrorMessage"] = "Please provide a valid rating for your review.";
-            return RedirectToAction("Index", "Book");
+            return RedirectToAction("Details", "Book", new { id = model.BookID });
         }
 
         // GET: /Review/Edit/{id} (UPDATE: Display form with existing data)
@@ -143,8 +144,15 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             try
             {
+                var review = _reviewService.GetReviewDetails(id);
                 _reviewService.DeleteReview(id);
                 TempData["SuccessMessage"] = "Review deleted successfully.";
+
+                // Redirect back to the book details page
+                if (review != null)
+                {
+                    return RedirectToAction("Details", "Book", new { id = review.BookID });
+                }
             }
             catch (KeyNotFoundException)
             {
