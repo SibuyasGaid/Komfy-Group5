@@ -235,29 +235,35 @@
                     </div>
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
-                
+
                 <div class="kozy-form-group">
                     <label class="kozy-form-label" for="password">Password</label>
                     <div class="kozy-form-input-wrapper">
                         <input type="password" id="password" class="kozy-form-input"
-                               asp-for="Password" placeholder="Enter password" />
+                               asp-for="Password" placeholder="Enter password"
+                               minlength="6" required
+                               oninvalid="this.setCustomValidity('Password must be at least 6 characters')"
+                               oninput="this.setCustomValidity('')" />
                         <i class="fa-solid fa-eye-slash kozy-password-toggle"
                            onclick="togglePassword('password', this)"></i>
                     </div>
                     <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
-                
+     
                 <div class="kozy-form-group">
                     <label class="kozy-form-label" for="confirmpassword">Confirm Password</label>
                     <div class="kozy-form-input-wrapper">
                         <input type="password" id="confirmpassword" class="kozy-form-input"
-                               asp-for="ConfirmPassword" placeholder="Confirm Password" />
+                               asp-for="ConfirmPassword" placeholder="Confirm Password"
+                               minlength="6" required
+                               oninvalid="this.setCustomValidity('Confirm Password must be at least 6 characters')"
+                               oninput="this.setCustomValidity('')" />
                         <i class="fa-solid fa-eye-slash kozy-password-toggle"
                            onclick="togglePassword('confirmpassword', this)"></i>
                     </div>
                     <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                 </div>
-                
+          
                 <button class="kozy-btn-register" type="submit">
                     Register
                 </button>
