@@ -324,7 +324,7 @@
         {
             @foreach (var book in recommendedBooks.Take(8))
             {
-                <a asp-action="Index" asp-controller="Book" asp-route-searchTerm="@book.Title" class="kozy-book-card">
+                <a asp-action="Details" asp-controller="Book" asp-route-id="@book.BookID" class="kozy-book-card">
                     <div class="kozy-book-cover">
                         @if (!string.IsNullOrEmpty(book.CoverImagePath))
                         {
@@ -343,7 +343,7 @@
                         <p class="kozy-book-author">@book.Author</p>
                         @if (book.ReviewCount > 0)
                         {
-                            <div style="color: #F59E0B; font-size: 0.875rem;">
+                            <div style="color: #F59E0B; font-size: 0.875rem; margin-bottom: 0.5rem;">
                                 @for (int i = 1; i <= 5; i++)
                                 {
                                     if (i <= Math.Floor(book.AverageRating))
@@ -362,6 +362,13 @@
                                 <span style="color: #6B7280; margin-left: 0.5rem;">@book.AverageRating.ToString("0.0")</span>
                             </div>
                         }
+                        <!-- Stock Information -->
+                        <div style="padding-top: 0.5rem; border-top: 1px solid #E5E7EB; font-size: 0.75rem;">
+                            <i class="fa-solid fa-boxes-stacked" style="color: #6B7280; margin-right: 0.25rem;"></i>
+                            <span style="color: #4B5563;">
+                                <strong style="color: @(book.AvailableQuantity > 0 ? "#10B981" : "#EF4444");">@book.AvailableQuantity</strong> of @book.Quantity copies available
+                            </span>
+                        </div>
                     </div>
                 </a>
             }

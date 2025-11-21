@@ -335,13 +335,13 @@
             <nav>
                 <ul class="kozy-profile-nav">
                     <li class="kozy-profile-nav-item">
-                        <a href="#account-details" class="kozy-profile-nav-link active" data-section="account-details">
+                        <a href="#account-details" class="kozy-profile-nav-link @(ViewBag.ActiveSection == null || ViewBag.ActiveSection == "account-details" ? "active" : "")" data-section="account-details">
                             <i class="fa-solid fa-user"></i>
                             <span>Account Details</span>
                         </a>
                     </li>
                     <li class="kozy-profile-nav-item">
-                        <a href="#change-password" class="kozy-profile-nav-link" data-section="change-password">
+                        <a href="#change-password" class="kozy-profile-nav-link @(ViewBag.ActiveSection == "change-password" ? "active" : "")" data-section="change-password">
                             <i class="fa-solid fa-lock"></i>
                             <span>Change Password</span>
                         </a>
@@ -359,7 +359,7 @@
         <!-- Main Content -->
         <main class="kozy-profile-content">
             <!-- Account Details Section -->
-            <div id="account-details-section" class="profile-section active">
+            <div id="account-details-section" class="profile-section @(ViewBag.ActiveSection == null || ViewBag.ActiveSection == "account-details" ? "active" : "")">
                 <h2 class="kozy-profile-section-title">
                     <i class="fa-solid fa-user"></i>
                     Account Details
@@ -369,8 +369,8 @@
                     @Html.AntiForgeryToken()
 
                     <div class="kozy-form-group">
-                        <label class="kozy-form-label">User ID</label>
-                        <input type="text" value="@Model.UserId" class="kozy-form-input" disabled />
+                        <label class="kozy-form-label">Username</label>
+                            <input type="text" value="@Model.UserId" class="kozy-form-input" disabled />
                         <div class="kozy-form-help">User ID cannot be changed</div>
                     </div>
 
@@ -419,7 +419,7 @@
             </div>
 
             <!-- Change Password Section -->
-            <div id="change-password-section" class="profile-section">
+            <div id="change-password-section" class="profile-section @(ViewBag.ActiveSection == "change-password" ? "active" : "")">
                 <h2 class="kozy-profile-section-title">
                     <i class="fa-solid fa-lock"></i>
                     Change Password

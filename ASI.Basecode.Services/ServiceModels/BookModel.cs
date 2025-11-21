@@ -48,6 +48,15 @@ namespace ASI.Basecode.Services.ServiceModels
         public int ViewCount { get; set; } = 0;
         public int BorrowCount { get; set; } = 0;
 
+        // Stock Management
+        [Required(ErrorMessage = "Quantity is required.")]
+        [Range(1, 999, ErrorMessage = "Quantity must be between 1 and 999.")]
+        public int Quantity { get; set; } = 1;
+
+        [Required(ErrorMessage = "Available Quantity is required.")]
+        [Range(0, 999, ErrorMessage = "Available Quantity must be between 0 and 999.")]
+        public int AvailableQuantity { get; set; } = 1;
+
         // Calculated fields (from Reviews)
         public double AverageRating { get; set; }
         public int ReviewCount { get; set; }

@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ASI.Basecode.Services.ServiceModels;
 using System.ComponentModel.DataAnnotations;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace ASI.Basecode.Services.ServiceModels
     public class UserViewModel
     {
         [Required(ErrorMessage = "Username is required.")]
+        [MinLength(6, ErrorMessage = "Username must be at least 6 characters.")]
         public string UserId { get; set; }
 
         [Required(ErrorMessage = "Name is required.")]

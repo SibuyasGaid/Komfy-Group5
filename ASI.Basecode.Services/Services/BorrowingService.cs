@@ -169,10 +169,10 @@ namespace ASI.Basecode.Services.Services
                 throw new Exception("Book not found.");
             }
 
-            // Business Logic: Check if book is available
-            if (book.Status != "Available")
+            // Business Logic: Check if book has available copies
+            if (book.AvailableQuantity <= 0)
             {
-                throw new Exception("Book is not available for borrowing.");
+                throw new Exception("No copies of this book are currently available for borrowing.");
             }
 
             // Mapping Service Model (BorrowingModel) to Data Model (Borrowing)
@@ -188,8 +188,19 @@ namespace ASI.Basecode.Services.Services
 
             _borrowingRepository.AddBorrowing(borrowingEntity);
 
-            // Update book status to "Borrowed"
-            book.Status = "Borrowed";
+            // Decrease available quantity
+            book.AvailableQuantity--;
+
+            // Update book status based on availability
+            if (book.AvailableQuantity == 0)
+            {
+                book.Status = "Borrowed"; // All copies borrowed
+            }
+            else
+            {
+                book.Status = "Available"; // Still has available copies
+            }
+
             _bookRepository.UpdateBook(book);
 
             // Increment borrow count for analytics (QUICK WIN #5)
@@ -240,11 +251,22 @@ namespace ASI.Basecode.Services.Services
             borrowingEntity.Status = "Returned";
             _borrowingRepository.UpdateBorrowing(borrowingEntity);
 
-            // Update book status back to "Available"
+            // Increase available quantity and update book status
             var book = _bookRepository.GetBookById(borrowingEntity.BookID);
             if (book != null)
             {
-                book.Status = "Available";
+                // Increase available quantity (don't exceed total quantity)
+                if (book.AvailableQuantity < book.Quantity)
+                {
+                    book.AvailableQuantity++;
+                }
+
+                // Update status - if any copies are available, mark as Available
+                if (book.AvailableQuantity > 0)
+                {
+                    book.Status = "Available";
+                }
+
                 _bookRepository.UpdateBook(book);
             }
 
@@ -281,13 +303,25 @@ namespace ASI.Basecode.Services.Services
                 throw new KeyNotFoundException($"Borrowing with ID {borrowingId} not found.");
             }
 
-            // If the borrowing is still active, make the book available again
-            if (borrowingEntity.Status == "Active" || borrowingEntity.Status == "Overdue")
+            // If the borrowing hasn't been returned yet, restore the available quantity
+            // (Only "Returned" status means the book was already given back)
+            if (borrowingEntity.Status != "Returned")
             {
                 var book = _bookRepository.GetBookById(borrowingEntity.BookID);
                 if (book != null)
                 {
-                    book.Status = "Available";
+                    // Increase available quantity (don't exceed total quantity)
+                    if (book.AvailableQuantity < book.Quantity)
+                    {
+                        book.AvailableQuantity++;
+                    }
+
+                    // Update status - if any copies are available, mark as Available
+                    if (book.AvailableQuantity > 0)
+                    {
+                        book.Status = "Available";
+                    }
+
                     _bookRepository.UpdateBook(book);
                 }
             }

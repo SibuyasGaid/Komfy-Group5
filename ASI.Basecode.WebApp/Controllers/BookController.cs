@@ -53,41 +53,27 @@ namespace ASI.Basecode.WebApp.Controllers
         {
             const int pageSize = 10;
             List<BookModel> books;
-            int totalCount;
 
-            // Handle search functionality
+            // Get all books first (either from search or all books)
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 books = _bookService.SearchBooks(searchTerm);
-                totalCount = books.Count;
-                books = books.Skip((page - 1) * pageSize).Take(pageSize).ToList();
                 ViewBag.SearchTerm = searchTerm;
             }
             else
             {
-                // Standard paginated book listing
-                var result = _bookService.GetAllBooksPaginated(page, pageSize);
-                books = result.Books;
-                totalCount = result.TotalCount;
+                books = _bookService.GetAllBooks();
             }
 
-            // Performance optimization: Load reviews and borrowings in bulk to avoid N+1 query problem
-            // This reduces database round trips from N queries to 2 queries total
-            var bookIds = books.Select(b => b.BookID).ToList();
-            var allReviews = _reviewService.GetAllReviews()
-                .Where(r => bookIds.Contains(r.BookID))
+            // Load all reviews for rating calculation BEFORE filtering
+            var allReviewsData = _reviewService.GetAllReviews()
                 .GroupBy(r => r.BookID)
                 .ToDictionary(g => g.Key, g => g.ToList());
-            
-            var allBorrowings = _borrowingService.GetAllBorrowings()
-                .Where(b => bookIds.Contains(b.BookID))
-                .GroupBy(b => b.BookID)
-                .ToDictionary(g => g.Key, g => g.ToList());
 
-            // Populate review statistics for each book using pre-loaded data
+            // Populate review statistics for ALL books
             foreach (var book in books)
             {
-                if (allReviews.TryGetValue(book.BookID, out var reviews))
+                if (allReviewsData.TryGetValue(book.BookID, out var reviews))
                 {
                     book.ReviewCount = reviews.Count;
                     book.AverageRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
@@ -99,7 +85,7 @@ namespace ASI.Basecode.WebApp.Controllers
                 }
             }
 
-            // Apply additional filters to the book list
+            // Apply filters BEFORE pagination
             if (!string.IsNullOrWhiteSpace(genre))
             {
                 books = books.Where(b => b.Genre != null && b.Genre.Equals(genre, System.StringComparison.OrdinalIgnoreCase)).ToList();
@@ -130,6 +116,26 @@ namespace ASI.Basecode.WebApp.Controllers
                 ViewBag.SelectedRating = minRating.Value;
             }
 
+            // Get total count AFTER filtering
+            var totalCount = books.Count;
+
+            // Apply pagination AFTER filtering
+            var paginatedBooks = books
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // Load reviews and borrowings only for paginated books
+            var bookIds = paginatedBooks.Select(b => b.BookID).ToList();
+            var allReviews = allReviewsData
+                .Where(kvp => bookIds.Contains(kvp.Key))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            var allBorrowings = _borrowingService.GetAllBorrowings()
+                .Where(b => bookIds.Contains(b.BookID))
+                .GroupBy(b => b.BookID)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
             // Prepare filter dropdown options from all books in the system
             var allBooks = _bookService.GetAllBooks();
             ViewBag.Genres = allBooks.Where(b => !string.IsNullOrWhiteSpace(b.Genre)).Select(b => b.Genre).Distinct().OrderBy(g => g).ToList();
@@ -138,13 +144,13 @@ namespace ASI.Basecode.WebApp.Controllers
             ViewBag.Years = allBooks.Where(b => b.DatePublished.HasValue).Select(b => b.DatePublished.Value.Year).Distinct().OrderByDescending(y => y).ToList();
 
             // Prepare review data for modal display using pre-loaded bulk data
-            ViewBag.AllReviews = books.ToDictionary(
+            ViewBag.AllReviews = paginatedBooks.ToDictionary(
                 b => b.BookID,
                 b => allReviews.TryGetValue(b.BookID, out var reviews) ? reviews : new List<ReviewModel>()
             );
 
             // Prepare borrowing history for modal display using pre-loaded bulk data
-            ViewBag.AllBorrowings = books.ToDictionary(
+            ViewBag.AllBorrowings = paginatedBooks.ToDictionary(
                 b => b.BookID,
                 b => allBorrowings.TryGetValue(b.BookID, out var borrowings) ? borrowings : new List<BorrowingModel>()
             );
@@ -155,7 +161,7 @@ namespace ASI.Basecode.WebApp.Controllers
             ViewBag.TotalCount = totalCount;
             ViewBag.PageSize = pageSize;
 
-            return View(books);
+            return View(paginatedBooks);
         }
 
         // GET: /Book/Create (CREATE: Display form)

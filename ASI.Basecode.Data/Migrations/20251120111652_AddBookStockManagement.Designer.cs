@@ -4,6 +4,7 @@ using ASI.Basecode.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASI.Basecode.Data.Migrations
 {
     [DbContext(typeof(AsiBasecodeDBContext))]
-    partial class AsiBasecodeDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251120111652_AddBookStockManagement")]
+    partial class AddBookStockManagement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -188,9 +191,6 @@ namespace ASI.Basecode.Data.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsUserActive")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -223,7 +223,6 @@ namespace ASI.Basecode.Data.Migrations
                             CreatedBy = "System",
                             CreatedTime = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "user@komfy.com",
-                            IsUserActive = true,
                             Name = "Regular User",
                             Password = "kQFwF4qT5I8C+TfGr5H8IA==",
                             Role = "Member",
@@ -236,7 +235,6 @@ namespace ASI.Basecode.Data.Migrations
                             CreatedBy = "System",
                             CreatedTime = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "admin@komfy.com",
-                            IsUserActive = true,
                             Name = "Administrator",
                             Password = "QpillzkpeKyc+8j/cuKetg==",
                             Role = "Admin",

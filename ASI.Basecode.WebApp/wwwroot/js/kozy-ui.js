@@ -17,6 +17,7 @@
         const sidebar = document.querySelector('.kozy-sidebar');
         const sidebarToggle = document.querySelector('.kozy-sidebar-toggle');
         const mainContent = document.querySelector('.kozy-main-content');
+        const header = document.querySelector('.kozy-header');
         const mobileOverlay = document.querySelector('.kozy-mobile-overlay');
 
         if (sidebarToggle) {
@@ -32,6 +33,9 @@
                     sidebar.classList.toggle('collapsed');
                     if (mainContent) {
                         mainContent.classList.toggle('sidebar-collapsed');
+                    }
+                    if (header) {
+                        header.classList.toggle('sidebar-collapsed');
                     }
                 }
             });

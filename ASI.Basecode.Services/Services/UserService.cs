@@ -30,7 +30,18 @@ namespace ASI.Basecode.Services.Services
             user = _repository.GetUsers().Where(x => x.UserId == userId &&
                                                      x.Password == passwordKey).FirstOrDefault();
 
-            return user != null ? LoginResult.Success : LoginResult.Failed;
+            if (user == null)
+            {
+                return LoginResult.Failed;
+            }
+
+            // Check if user account is active
+            if (!user.IsUserActive)
+            {
+                return LoginResult.Failed;
+            }
+
+            return LoginResult.Success;
         }
 
         public List<UserModel> GetAllUsers()
@@ -44,6 +55,7 @@ namespace ASI.Basecode.Services.Services
                 Name = u.Name,
                 Email = u.Email,
                 Role = u.Role,
+                IsUserActive = u.IsUserActive,
                 CreatedBy = u.CreatedBy,
                 CreatedTime = u.CreatedTime,
                 UpdatedBy = u.UpdatedBy,
@@ -66,6 +78,7 @@ namespace ASI.Basecode.Services.Services
                 Name = user.Name,
                 Email = user.Email,
                 Role = user.Role,
+                IsUserActive = user.IsUserActive,
                 CreatedBy = user.CreatedBy,
                 CreatedTime = user.CreatedTime,
                 UpdatedBy = user.UpdatedBy,
@@ -88,6 +101,7 @@ namespace ASI.Basecode.Services.Services
                 Name = user.Name,
                 Email = user.Email,
                 Role = user.Role,
+                IsUserActive = user.IsUserActive,
                 CreatedBy = user.CreatedBy,
                 CreatedTime = user.CreatedTime,
                 UpdatedBy = user.UpdatedBy,
@@ -128,8 +142,13 @@ namespace ASI.Basecode.Services.Services
         public void AddUser(UserViewModel model)
         {
             var user = new User();
+            // Prevent duplicate UserId or Email for registrations
             if (!_repository.UserExists(model.UserId))
             {
+                if (!string.IsNullOrEmpty(model.Email) && _repository.EmailExists(model.Email))
+                {
+                    throw new InvalidDataException("Email already exists.");
+                }
                 _mapper.Map(model, user);
                 user.Password = PasswordManager.EncryptPassword(model.Password);
                 user.Role = "Member"; // Set default role to Member for new registrations
@@ -188,6 +207,67 @@ namespace ASI.Basecode.Services.Services
             }
 
             _repository.DeleteUser(userEntity);
+        }
+
+        // DEACTIVATE USER (Soft Delete)
+        public void DeactivateUser(string userId)
+        {
+            var userEntity = _repository.GetUserById(userId);
+
+            if (userEntity == null)
+            {
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
+            }
+
+            if (!userEntity.IsUserActive)
+            {
+                throw new Exception("User is already deactivated.");
+            }
+
+            userEntity.IsUserActive = false;
+            userEntity.UpdatedTime = DateTime.Now;
+            userEntity.UpdatedBy = System.Environment.UserName;
+
+            _repository.UpdateUser(userEntity);
+        }
+
+        // ACTIVATE USER
+        public void ActivateUser(string userId)
+        {
+            var userEntity = _repository.GetUserById(userId);
+
+            if (userEntity == null)
+            {
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
+            }
+
+            if (userEntity.IsUserActive)
+            {
+                throw new Exception("User is already active.");
+            }
+
+            userEntity.IsUserActive = true;
+            userEntity.UpdatedTime = DateTime.Now;
+            userEntity.UpdatedBy = System.Environment.UserName;
+
+            _repository.UpdateUser(userEntity);
+        }
+
+        // TOGGLE USER ACTIVATION
+        public void ToggleUserActivation(string userId)
+        {
+            var userEntity = _repository.GetUserById(userId);
+
+            if (userEntity == null)
+            {
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
+            }
+
+            userEntity.IsUserActive = !userEntity.IsUserActive;
+            userEntity.UpdatedTime = DateTime.Now;
+            userEntity.UpdatedBy = System.Environment.UserName;
+
+            _repository.UpdateUser(userEntity);
         }
 
         // QUICK WIN #4: Grant Admin Access

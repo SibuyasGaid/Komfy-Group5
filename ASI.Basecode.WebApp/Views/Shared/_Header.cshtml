@@ -58,16 +58,23 @@
             </a>
             
             @* Reviews Navigation Link *@
-            <a asp-action="Index" asp-controller="Review" 
+            <a asp-action="Index" asp-controller="Review"
                class="kozy-nav-item @(currentController == "Review" ? "active" : "")">
                 <i class="fa-solid fa-star"></i>
                 <span>Reviews</span>
             </a>
-            
+
+            @* Notifications Navigation Link *@
+            <a asp-action="Index" asp-controller="Notification"
+               class="kozy-nav-item @(currentController == "Notification" ? "active" : "")">
+                <i class="fa-solid fa-bell"></i>
+                <span>Notifications</span>
+            </a>
+
             @* Admin-only: User Management Navigation Link *@
             @if (User.IsInRole("Admin"))
             {
-                <a asp-action="Index" asp-controller="User" 
+                <a asp-action="Index" asp-controller="User"
                    class="kozy-nav-item @(currentController == "User" ? "active" : "")">
                     <i class="fa-solid fa-users"></i>
                     <span>Users</span>
@@ -122,17 +129,8 @@
             <i class="fa-solid fa-bars"></i>
         </button>
         
-        @* Header Actions: Notifications and User Menu *@
+        @* Header Actions: User Menu *@
         <div class="kozy-header-actions" style="display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; margin-left: auto;">
-            @* Notification Bell Icon with Unread Count Badge *@
-            <a asp-action="Index" asp-controller="Notification" class="kozy-header-icon position-relative" style="text-decoration: none; color: var(--kozy-text-primary); flex-shrink: 0;">
-                <i class="fa-solid fa-bell" style="font-size: 1.25rem;"></i>
-                <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill" 
-                      style="background-color: #EF4444; display: none; font-size: 0.65rem; padding: 0.25em 0.5em;">
-                    0
-                </span>
-            </a>
-            
             @* User Menu Dropdown *@
             <div class="dropdown" style="flex-shrink: 0;">
                 <button class="btn btn-link dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" 

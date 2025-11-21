@@ -325,14 +325,15 @@ h1, h2, h3, h4, h5, h6 {
     top: 0;
     left: 280px;
     right: 0;
-    z-index: 100;
+    z-index: 50;
     transition: left var(--kozy-transition-base);
     overflow: visible;
     min-width: 0;
     max-width: 100%;
 }
 
-.kozy-main-content.sidebar-collapsed .kozy-header {
+/* When sidebar is collapsed, header should extend to full width */
+.kozy-header.sidebar-collapsed {
     left: 0;
 }
 
@@ -345,6 +346,26 @@ h1, h2, h3, h4, h5, h6 {
     min-width: 0;
     margin-left: auto;
     padding-right: 0;
+}
+
+/* Notification Icon Styling */
+.kozy-header-icon {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+}
+
+.kozy-header-icon:hover {
+    background-color: var(--kozy-cream);
+    transform: scale(1.05);
+}
+
+.kozy-header-icon i {
+    color: var(--kozy-text-primary);
 }
 
 /* Genre Cards */

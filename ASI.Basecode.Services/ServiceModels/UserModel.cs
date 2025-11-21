@@ -26,6 +26,8 @@ namespace ASI.Basecode.Services.ServiceModels
         [StringLength(50)]
         public string Role { get; set; } = "Member"; // Default role
 
+        public bool IsUserActive { get; set; } = true; // User activation status
+
         // Audit fields
         public string CreatedBy { get; set; }
         public DateTime CreatedTime { get; set; }

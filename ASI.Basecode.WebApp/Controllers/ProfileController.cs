@@ -82,7 +82,11 @@ namespace ASI.Basecode.WebApp.Controllers
             if (newPassword != confirmPassword)
             {
                 TempData["ErrorMessage"] = "New password and confirmation password do not match.";
-                return RedirectToAction(nameof(Index));
+
+                // Re-render the profile page and show the Change Password section
+                var userModel = _userService.GetUserDetails(userId);
+                ViewBag.ActiveSection = "change-password";
+                return View("Index", userModel);
             }
 
             try
@@ -93,6 +97,11 @@ namespace ASI.Basecode.WebApp.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
+
+                // On error re-render and keep the change-password tab open
+                var userModel = _userService.GetUserDetails(userId);
+                ViewBag.ActiveSection = "change-password";
+                return View("Index", userModel);
             }
 
             return RedirectToAction(nameof(Index));

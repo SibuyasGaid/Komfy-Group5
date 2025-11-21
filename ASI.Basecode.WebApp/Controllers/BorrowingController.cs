@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ASI.Basecode.WebApp.Controllers
 {
@@ -26,8 +27,9 @@ namespace ASI.Basecode.WebApp.Controllers
         }
 
         // GET: /Borrowing/Index (READ: List all borrowings)
-        public IActionResult Index()
+        public IActionResult Index(int page = 1)
         {
+            const int pageSize = 5;
             List<BorrowingModel> borrowings;
 
             // If user is Admin, show all borrowings; otherwise show only their own
@@ -49,12 +51,63 @@ namespace ASI.Basecode.WebApp.Controllers
                 borrowings = _borrowingService.GetBorrowingsByUserId(userId);
             }
 
-            return View(borrowings);
+            // Automatically mark overdue borrowings
+            var now = DateTime.Now;
+            foreach (var borrowing in borrowings)
+            {
+                if (borrowing.Status == "Active" && borrowing.DueDate < now)
+                {
+                    try
+                    {
+                        _borrowingService.MarkAsOverdue(borrowing.BorrowingID);
+                        borrowing.Status = "Overdue"; // Update the model for immediate display
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error marking borrowing {borrowing.BorrowingID} as overdue");
+                    }
+                }
+            }
+
+            // Pagination
+            var totalBorrowings = borrowings.Count;
+            var totalPages = (int)Math.Ceiling(totalBorrowings / (double)pageSize);
+
+            var paginatedBorrowings = borrowings
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalBorrowings = totalBorrowings;
+
+            return View(paginatedBorrowings);
         }
 
         // GET: /Borrowing/Active (READ: List active borrowings)
         public IActionResult Active()
         {
+            // First, mark any overdue borrowings that are still "Active"
+            var allActiveBorrowings = _borrowingService.GetActiveBorrowings();
+            var now = DateTime.Now;
+
+            foreach (var borrowing in allActiveBorrowings)
+            {
+                if (borrowing.Status == "Active" && borrowing.DueDate < now)
+                {
+                    try
+                    {
+                        _borrowingService.MarkAsOverdue(borrowing.BorrowingID);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error marking borrowing {borrowing.BorrowingID} as overdue");
+                    }
+                }
+            }
+
+            // Now get the truly active borrowings (not overdue)
             var borrowings = _borrowingService.GetActiveBorrowings();
             return View(borrowings);
         }
@@ -62,6 +115,26 @@ namespace ASI.Basecode.WebApp.Controllers
         // GET: /Borrowing/Overdue (READ: List overdue borrowings)
         public IActionResult Overdue()
         {
+            // First, mark any overdue borrowings that are still "Active"
+            var allActiveBorrowings = _borrowingService.GetActiveBorrowings();
+            var now = DateTime.Now;
+
+            foreach (var borrowing in allActiveBorrowings)
+            {
+                if (borrowing.Status == "Active" && borrowing.DueDate < now)
+                {
+                    try
+                    {
+                        _borrowingService.MarkAsOverdue(borrowing.BorrowingID);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error marking borrowing {borrowing.BorrowingID} as overdue");
+                    }
+                }
+            }
+
+            // Now get the overdue borrowings
             var borrowings = _borrowingService.GetOverdueBorrowings();
             return View(borrowings);
         }

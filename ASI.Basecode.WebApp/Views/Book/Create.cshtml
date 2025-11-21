@@ -86,6 +86,26 @@
             <p class="text-gray-600 text-xs mt-1">Maximum 2000 characters</p>
         </div>
 
+        <!-- Stock Management Fields -->
+        <div class="mb-4 grid grid-cols-2 gap-4">
+            <div>
+                <label asp-for="Quantity" class="block text-gray-700 text-sm font-bold mb-2">
+                    <i class="fa-solid fa-boxes-stacked mr-1"></i>Total Quantity
+                </label>
+                <input asp-for="Quantity" type="number" min="1" max="999" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                <span asp-validation-for="Quantity" class="text-red-500 text-xs italic"></span>
+                <p class="text-gray-600 text-xs mt-1">Total number of copies in library</p>
+            </div>
+            <div>
+                <label asp-for="AvailableQuantity" class="block text-gray-700 text-sm font-bold mb-2">
+                    <i class="fa-solid fa-check-circle mr-1"></i>Available Quantity
+                </label>
+                <input asp-for="AvailableQuantity" type="number" min="0" max="999" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                <span asp-validation-for="AvailableQuantity" class="text-red-500 text-xs italic"></span>
+                <p class="text-gray-600 text-xs mt-1">Copies currently available for borrowing</p>
+            </div>
+        </div>
+
         <!-- Cover Image Upload Field -->
         <div class="mb-6">
             <label class="block text-gray-700 text-sm font-bold mb-2">

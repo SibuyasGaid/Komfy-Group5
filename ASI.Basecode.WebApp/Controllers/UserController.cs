@@ -3,7 +3,9 @@ using ASI.Basecode.Services.ServiceModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ASI.Basecode.WebApp.Controllers
 {
@@ -21,9 +23,23 @@ namespace ASI.Basecode.WebApp.Controllers
         }
 
         // GET: /User/Index (READ: List all users)
-        public IActionResult Index()
+        public IActionResult Index(int page = 1)
         {
-            var users = _userService.GetAllUsers();
+            const int pageSize = 5;
+            var allUsers = _userService.GetAllUsers();
+
+            var totalUsers = allUsers.Count;
+            var totalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
+
+            var users = allUsers
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalUsers = totalUsers;
+
             return View(users);
         }
 
@@ -98,23 +114,23 @@ namespace ASI.Basecode.WebApp.Controllers
             return View(model);
         }
 
-        // POST: /User/Delete/{id} (DELETE: Process deletion)
-        [HttpPost, ActionName("Delete")]
+        // POST: /User/ToggleActivation/{id} (TOGGLE: Activate/Deactivate user)
+        [HttpPost, ActionName("ToggleActivation")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(string id)
+        public IActionResult ToggleActivation(string id)
         {
             try
             {
-                _userService.DeleteUser(id);
-                TempData["SuccessMessage"] = "User deleted successfully.";
+                _userService.ToggleUserActivation(id);
+                TempData["SuccessMessage"] = "User status updated successfully.";
             }
             catch (KeyNotFoundException)
             {
-                TempData["ErrorMessage"] = "User not found or already deleted.";
+                TempData["ErrorMessage"] = "User not found.";
             }
             catch (System.Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error deleting user: {ex.Message}";
+                TempData["ErrorMessage"] = $"Error updating user status: {ex.Message}";
             }
             return RedirectToAction(nameof(Index));
         }

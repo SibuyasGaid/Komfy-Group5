@@ -58,7 +58,7 @@ namespace ASI.Basecode.Data.Repositories
             return this.GetDbSet<Borrowing>()
                 .Include(b => b.User)
                 .Include(b => b.Book)
-                .Where(b => b.Status == "Active" && b.DueDate < today);
+                .Where(b => (b.Status == "Active" || b.Status == "Overdue") && b.DueDate < today);
         }
 
         public void AddBorrowing(Borrowing borrowing)

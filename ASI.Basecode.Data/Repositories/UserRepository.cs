@@ -35,7 +35,21 @@ namespace ASI.Basecode.Data.Repositories
 
         public void UpdateUser(User user)
         {
-            this.SetEntityState(user, EntityState.Modified);
+            var dbSet = this.GetDbSet<User>();
+            var existingUser = dbSet.Find(user.UserId);
+            if (existingUser != null)
+            {
+                // Update all properties
+                existingUser.Name = user.Name;
+                existingUser.Email = user.Email;
+                existingUser.Password = user.Password;
+                existingUser.Role = user.Role;
+                existingUser.IsUserActive = user.IsUserActive;
+                existingUser.UpdatedBy = user.UpdatedBy;
+                existingUser.UpdatedTime = user.UpdatedTime;
+                existingUser.PasswordResetToken = user.PasswordResetToken;
+                existingUser.PasswordResetTokenExpiry = user.PasswordResetTokenExpiry;
+            }
             UnitOfWork.SaveChanges();
         }
 

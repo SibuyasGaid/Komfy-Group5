@@ -399,6 +399,13 @@
                         </span>
                         <span style="font-size: 0.75rem; color: #6B7280; font-family: monospace;">@item.BookCode</span>
                     </div>
+                    <!-- Stock Information -->
+                    <div class="mt-2 pt-2" style="border-top: 1px solid #E5E7EB; font-size: 0.75rem;">
+                        <i class="fa-solid fa-boxes-stacked mr-1" style="color: #6B7280;"></i>
+                        <span style="color: #4B5563;">
+                            <strong style="color: @(item.AvailableQuantity > 0 ? "#10B981" : "#EF4444");">@item.AvailableQuantity</strong> of @item.Quantity copies available
+                        </span>
+                    </div>
                 </div>
             </div>
 

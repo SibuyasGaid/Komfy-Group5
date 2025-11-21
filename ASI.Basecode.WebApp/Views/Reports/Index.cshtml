@@ -17,37 +17,59 @@
     }
 
     .kozy-reports-tabs {
-        border-bottom: 2px solid #E5E7EB;
+        border: none !important;
         margin-bottom: 2rem;
-        background: white;
-        padding: 0 1rem;
-        border-radius: 12px 12px 0 0;
-        display: flex;
-        gap: 0.5rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        background: transparent;
+        padding: 0;
+        border-radius: 0;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 1rem;
+        flex-wrap: wrap;
+        box-shadow: none;
+        width: 100%;
     }
 
     .kozy-tab-link {
-        padding: 1rem 1.5rem;
+        padding: 0.875rem 2rem;
         color: #6B7280;
         text-decoration: none;
-        font-weight: 500;
-        border-bottom: 3px solid transparent;
+        font-weight: 600;
+        border: 2px solid #E5E7EB;
+        border-radius: 12px;
         transition: all 0.3s ease;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
         position: relative;
-        border-radius: 8px 8px 0 0;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .kozy-tab-link:hover {
         color: #FF8223;
-        border-bottom-color: rgba(255, 130, 35, 0.3);
+        border-color: #FF8223;
+        background: rgba(255, 130, 35, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(255, 130, 35, 0.15);
     }
 
     .kozy-tab-link.active {
-        color: #FF8223;
-        border-bottom-color: #FF8223;
-        background: rgba(255, 130, 35, 0.05);
+        color: white;
+        background: linear-gradient(135deg, #FF8223 0%, #FFA45F 100%);
+        border-color: #FF8223;
+        box-shadow: 0 4px 8px rgba(255, 130, 35, 0.3);
+    }
+
+    .kozy-tab-link.active:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(255, 130, 35, 0.4);
+    }
+
+    .kozy-tab-link i {
+        font-size: 1.1rem;
     }
 
     .kozy-stats-grid {
@@ -158,11 +180,27 @@
 </style>
 
 <div class="animate-fade-in">
-    <div class="kozy-reports-header">
-        <h1 class="kozy-reports-title">
+    <div class="kozy-reports-header" style="text-align: center; margin-bottom: 1.5rem;">
+        <h1 class="kozy-reports-title" style="justify-content: center;">
             <i class="fa-solid fa-chart-line" style="color: #FF8223;"></i>
             System Reports
         </h1>
+    </div>
+
+    <!-- Tabs Navigation - Pill-style buttons for easy navigation -->
+    <div class="kozy-reports-tabs" role="tablist">
+        <a class="kozy-tab-link active" data-bs-toggle="tab" href="#borrowing" role="tab" aria-selected="true">
+            <i class="fa-solid fa-book-open-reader"></i>
+            <span>Borrowing Report</span>
+        </a>
+        <a class="kozy-tab-link" data-bs-toggle="tab" href="#inventory" role="tab" aria-selected="false">
+            <i class="fa-solid fa-book"></i>
+            <span>Inventory Report</span>
+        </a>
+        <a class="kozy-tab-link" data-bs-toggle="tab" href="#member" role="tab" aria-selected="false">
+            <i class="fa-solid fa-users"></i>
+            <span>Member Report</span>
+        </a>
     </div>
 
     @if (TempData["ErrorMessage"] != null)
@@ -172,27 +210,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-
-    <!-- Tabs Navigation - Positioned below header, outside sidebar -->
-    <div style="background: white; border-radius: 12px; padding: 1rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
-        <ul class="nav nav-tabs kozy-reports-tabs" role="tablist" style="border-bottom: 2px solid #E5E7EB; margin: 0;">
-        <li class="nav-item" role="presentation">
-            <a class="kozy-tab-link active" data-bs-toggle="tab" href="#borrowing" role="tab" aria-selected="true">
-                <i class="fa-solid fa-book-open-reader me-2"></i>Borrowing Report
-            </a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a class="kozy-tab-link" data-bs-toggle="tab" href="#inventory" role="tab" aria-selected="false">
-                <i class="fa-solid fa-book me-2"></i>Inventory Report
-            </a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a class="kozy-tab-link" data-bs-toggle="tab" href="#member" role="tab" aria-selected="false">
-                <i class="fa-solid fa-users me-2"></i>Member Report
-            </a>
-        </li>
-        </ul>
-    </div>
 
     <!-- Tab Content -->
     <div class="tab-content">

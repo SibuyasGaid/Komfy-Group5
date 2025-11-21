@@ -32,6 +32,10 @@ namespace ASI.Basecode.Data.Models
         public int ViewCount { get; set; } = 0; // Number of times book details viewed
         public int BorrowCount { get; set; } = 0; // Number of times book borrowed
 
+        // Stock Management (NEW FIELDS)
+        public int Quantity { get; set; } = 1; // Total number of copies in library
+        public int AvailableQuantity { get; set; } = 1; // Number of copies currently available for borrowing
+
         // -----------------------------------------------------------------
         // NAVIGATION PROPERTIES
         // -----------------------------------------------------------------
@@ -49,6 +53,8 @@ namespace ASI.Basecode.Data.Models
             ViewCount = 0;
             BorrowCount = 0;
             IsEbook = false;
+            Quantity = 1;
+            AvailableQuantity = 1;
         }
     }
 }

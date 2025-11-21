@@ -22,8 +22,10 @@ namespace ASI.Basecode.Services.Interfaces
         // UPDATE operation
         void UpdateUser(UserModel model);
 
-        // DELETE operation
-        void DeleteUser(string userId);
+        // DEACTIVATE/ACTIVATE operations (replaced DELETE)
+        void DeactivateUser(string userId);
+        void ActivateUser(string userId);
+        void ToggleUserActivation(string userId);
 
         // QUICK WIN #4: Admin access management
         void GrantAdminAccess(string userId);

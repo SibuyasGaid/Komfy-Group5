@@ -14,6 +14,7 @@ namespace ASI.Basecode.Data.Models
         public string Email { get; set; }
         public string Password { get; set; }
         public string Role { get; set; } // e.g., 'Admin' or 'Member'
+        public bool IsUserActive { get; set; } = true; // User activation status
 
         // Password Reset Fields (CRITICAL FEATURE #1)
         public string PasswordResetToken { get; set; }

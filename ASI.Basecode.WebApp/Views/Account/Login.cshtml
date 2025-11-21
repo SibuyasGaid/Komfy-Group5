@@ -253,6 +253,12 @@
                 padding: 2rem;
             }
         }
+        .kozy-validation-error {
+            color: #DC2626;
+            font-size: 0.95rem;
+            margin: 0 0 1rem 0;
+            display: block;
+        }
     </style>
 }
 @{
@@ -268,12 +274,19 @@
                 <div class="kozy-form-header-tagline">A LIBRARY SORTING SYSTEM</div>
             </div>
             
+            @* Show model-level errors (e.g., incorrect username/password) *@
+            <div asp-validation-summary="All" class="kozy-validation-error" role="alert"></div>
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="kozy-validation-error" role="alert">@TempData["ErrorMessage"]</div>
+            }
+
             <form method="post" action="/Account/Login" id="loginForm">
                 <div class="kozy-form-group">
-                    <label class="kozy-form-label" for="form2Example11">@UserId</label>
+                    <label class="kozy-form-label" for="form2Example11">Username</label>
                     <div class="kozy-form-input-wrapper">
                         <input type="text" id="form2Example11" class="kozy-form-input"
-                               asp-for="UserId" placeholder="Enter userid" />
+                               asp-for="UserId" placeholder="Enter username" />
                     </div>
                     <span asp-validation-for="UserId" class="text-danger"></span>
                 </div>
