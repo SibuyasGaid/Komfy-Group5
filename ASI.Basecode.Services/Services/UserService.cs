@@ -142,8 +142,13 @@ namespace ASI.Basecode.Services.Services
         public void AddUser(UserViewModel model)
         {
             var user = new User();
+            // Prevent duplicate UserId or Email for registrations
             if (!_repository.UserExists(model.UserId))
             {
+                if (!string.IsNullOrEmpty(model.Email) && _repository.EmailExists(model.Email))
+                {
+                    throw new InvalidDataException("Email already exists.");
+                }
                 _mapper.Map(model, user);
                 user.Password = PasswordManager.EncryptPassword(model.Password);
                 user.Role = "Member"; // Set default role to Member for new registrations
