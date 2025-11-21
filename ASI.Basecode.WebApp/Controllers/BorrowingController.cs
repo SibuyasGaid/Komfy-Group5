@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ASI.Basecode.WebApp.Controllers
 {
@@ -26,8 +27,9 @@ namespace ASI.Basecode.WebApp.Controllers
         }
 
         // GET: /Borrowing/Index (READ: List all borrowings)
-        public IActionResult Index()
+        public IActionResult Index(int page = 1)
         {
+            const int pageSize = 5;
             List<BorrowingModel> borrowings;
 
             // If user is Admin, show all borrowings; otherwise show only their own
@@ -67,7 +69,20 @@ namespace ASI.Basecode.WebApp.Controllers
                 }
             }
 
-            return View(borrowings);
+            // Pagination
+            var totalBorrowings = borrowings.Count;
+            var totalPages = (int)Math.Ceiling(totalBorrowings / (double)pageSize);
+
+            var paginatedBorrowings = borrowings
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalBorrowings = totalBorrowings;
+
+            return View(paginatedBorrowings);
         }
 
         // GET: /Borrowing/Active (READ: List active borrowings)

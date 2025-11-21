@@ -211,6 +211,44 @@
                 </tbody>
             </table>
         </div>
+
+        @* Pagination *@
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div class="d-flex justify-content-between align-items-center p-3" style="border-top: 1px solid #E5E7EB;">
+                <div class="text-muted">
+                    Showing @((ViewBag.CurrentPage - 1) * 5 + 1) to @(Math.Min(ViewBag.CurrentPage * 5, ViewBag.TotalBorrowings)) of @ViewBag.TotalBorrowings borrowings
+                </div>
+                <nav aria-label="Borrowing pagination">
+                    <ul class="pagination mb-0">
+                        @* Previous button *@
+                        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1 })" style="color: #FF8223; border-color: #E5E7EB;">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        @* Page numbers *@
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = i })"
+                                   style="@(i == ViewBag.CurrentPage ? "background: linear-gradient(135deg, #FF8223 0%, #FFA45F 100%); border-color: #FF8223; color: white;" : "color: #FF8223; border-color: #E5E7EB;")">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        @* Next button *@
+                        <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1 })" style="color: #FF8223; border-color: #E5E7EB;">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
     </div>
 </div>
 

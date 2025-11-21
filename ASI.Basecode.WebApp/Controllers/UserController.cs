@@ -3,7 +3,9 @@ using ASI.Basecode.Services.ServiceModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ASI.Basecode.WebApp.Controllers
 {
@@ -21,9 +23,23 @@ namespace ASI.Basecode.WebApp.Controllers
         }
 
         // GET: /User/Index (READ: List all users)
-        public IActionResult Index()
+        public IActionResult Index(int page = 1)
         {
-            var users = _userService.GetAllUsers();
+            const int pageSize = 5;
+            var allUsers = _userService.GetAllUsers();
+
+            var totalUsers = allUsers.Count;
+            var totalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
+
+            var users = allUsers
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalUsers = totalUsers;
+
             return View(users);
         }
 
