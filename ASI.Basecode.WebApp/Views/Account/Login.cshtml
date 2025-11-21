@@ -295,7 +295,7 @@
                     <label class="kozy-form-label" for="form2Example22">@Password</label>
                     <div class="kozy-form-input-wrapper">
                         <input type="password" id="form2Example22" class="kozy-form-input"
-                               asp-for="Password" placeholder="Enter password" />
+                               asp-for="Password" placeholder="Enter password (min 6 characters)" minlength="6" />
                         <i class="fa-solid fa-eye-slash kozy-password-toggle"
                            onclick="togglePassword('form2Example22', this)"></i>
                     </div>
