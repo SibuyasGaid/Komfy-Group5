@@ -17,33 +17,38 @@
             padding: 2rem;
         }
 
-        .kozy-login-container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -10%;
-            width: 400px;
-            height: 400px;
-            background: rgba(255, 130, 35, 0.1);
-            border-radius: 50%;
-            animation: float 8s ease-in-out infinite;
-        }
+            .kozy-login-container::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -10%;
+                width: 400px;
+                height: 400px;
+                background: rgba(255, 130, 35, 0.1);
+                border-radius: 50%;
+                animation: float 8s ease-in-out infinite;
+            }
 
-        .kozy-login-container::after {
-            content: '';
-            position: absolute;
-            bottom: -30%;
-            right: -5%;
-            width: 350px;
-            height: 350px;
-            background: rgba(104, 190, 178, 0.1);
-            border-radius: 50%;
-            animation: float 10s ease-in-out infinite reverse;
-        }
+            .kozy-login-container::after {
+                content: '';
+                position: absolute;
+                bottom: -30%;
+                right: -5%;
+                width: 350px;
+                height: 350px;
+                background: rgba(104, 190, 178, 0.1);
+                border-radius: 50%;
+                animation: float 10s ease-in-out infinite reverse;
+            }
 
         @@keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-25px) rotate(5deg); }
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-25px) rotate(5deg);
+            }
         }
 
         @@keyframes fadeInUp {
@@ -51,6 +56,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -121,15 +127,15 @@
             color: #2F3030;
         }
 
-        .kozy-form-input:focus {
-            outline: none;
-            border-color: #FF8223;
-            box-shadow: 0 0 0 3px rgba(255, 130, 35, 0.1);
-        }
+            .kozy-form-input:focus {
+                outline: none;
+                border-color: #FF8223;
+                box-shadow: 0 0 0 3px rgba(255, 130, 35, 0.1);
+            }
 
-        .kozy-form-input::placeholder {
-            color: #9CA3AF;
-        }
+            .kozy-form-input::placeholder {
+                color: #9CA3AF;
+            }
 
         .kozy-password-toggle {
             position: absolute;
@@ -141,9 +147,9 @@
             transition: color 0.3s ease;
         }
 
-        .kozy-password-toggle:hover {
-            color: #FF8223;
-        }
+            .kozy-password-toggle:hover {
+                color: #FF8223;
+            }
 
         .kozy-btn-register {
             width: 100%;
@@ -160,11 +166,18 @@
             margin-top: 0.5rem;
         }
 
-        .kozy-btn-register:hover {
-            background: #2A5C55;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(104, 190, 178, 0.4);
-        }
+            .kozy-btn-register:hover {
+                background: #2A5C55;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(104, 190, 178, 0.4);
+            }
+
+            .kozy-btn-register:disabled {
+                background: #C3C3C3;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
 
         .kozy-btn-back {
             color: #2F3030;
@@ -177,12 +190,49 @@
             margin-top: 1.5rem;
         }
 
-        .kozy-btn-back:hover {
-            color: #FF8223;
-        }
+            .kozy-btn-back:hover {
+                color: #FF8223;
+            }
 
         .kozy-back-section {
             text-align: center;
+        }
+
+        .password-requirement {
+            font-size: 0.75rem;
+            color: #6B7280;
+            margin-top: 0.5rem;
+        }
+
+        .password-warning {
+            color: #DC2626;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .input-error {
+            border-color: #DC2626 !important;
+        }
+
+        .validation-summary {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .validation-summary-errors {
+            color: #DC2626;
+            font-size: 0.875rem;
+        }
+
+        .text-danger {
+            color: #DC2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: block;
         }
 
         @@media (max-width: 576px) {
@@ -207,8 +257,13 @@
                 <div class="kozy-form-header-logo">KOZY.</div>
                 <div class="kozy-form-header-subtitle">Create Your Account</div>
             </div>
-            
-            <form method="post" action="/Account/Register">
+
+            <!-- Server-side validation summary -->
+            <div asp-validation-summary="All" class="validation-summary"></div>
+
+            <form method="post" action="/Account/Register" id="registerForm">
+                @Html.AntiForgeryToken()
+
                 <div class="kozy-form-group">
                     <label class="kozy-form-label" for="userId">User ID</label>
                     <div class="kozy-form-input-wrapper">
@@ -217,7 +272,7 @@
                     </div>
                     <span asp-validation-for="UserId" class="text-danger"></span>
                 </div>
-                
+
                 <div class="kozy-form-group">
                     <label class="kozy-form-label" for="name">Name</label>
                     <div class="kozy-form-input-wrapper">
@@ -226,7 +281,7 @@
                     </div>
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
-                
+
                 <div class="kozy-form-group">
                     <label class="kozy-form-label" for="email">Email</label>
                     <div class="kozy-form-input-wrapper">
@@ -235,33 +290,42 @@
                     </div>
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
-                
+
                 <div class="kozy-form-group">
                     <label class="kozy-form-label" for="password">Password</label>
                     <div class="kozy-form-input-wrapper">
                         <input type="password" id="password" class="kozy-form-input"
-                               asp-for="Password" placeholder="Enter password" />
+                               asp-for="Password" placeholder="Enter password"
+                               minlength="6" required />
                         <i class="fa-solid fa-eye-slash kozy-password-toggle"
                            onclick="togglePassword('password', this)"></i>
                     </div>
+                    <div class="password-requirement">Password must be at least 6 characters long</div>
+                    <div id="passwordWarning" class="password-warning">
+                        <i class="fa-solid fa-exclamation-triangle"></i> Password must be at least 6 characters long
+                    </div>
                     <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
-                
+
                 <div class="kozy-form-group">
                     <label class="kozy-form-label" for="confirmpassword">Confirm Password</label>
                     <div class="kozy-form-input-wrapper">
                         <input type="password" id="confirmpassword" class="kozy-form-input"
-                               asp-for="ConfirmPassword" placeholder="Confirm Password" />
+                               asp-for="ConfirmPassword" placeholder="Confirm Password"
+                               minlength="6" required />
                         <i class="fa-solid fa-eye-slash kozy-password-toggle"
                            onclick="togglePassword('confirmpassword', this)"></i>
                     </div>
+                    <div id="confirmPasswordWarning" class="password-warning">
+                        <i class="fa-solid fa-exclamation-triangle"></i> Passwords do not match
+                    </div>
                     <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                 </div>
-                
-                <button class="kozy-btn-register" type="submit">
+
+                <button class="kozy-btn-register" type="submit" id="registerBtn">
                     Register
                 </button>
-                
+
                 <div class="kozy-back-section">
                     <a asp-controller="Account" asp-action="Login" class="kozy-btn-back">
                         <i class="fa-solid fa-arrow-left"></i> Back to Login
@@ -271,16 +335,39 @@
         </div>
     </div>
 </div>
+
 @section scripts {
+    <partial name="_ValidationScriptsPartial" />
+
     <script>
-        var errorMessage = '@TempData["ErrorMessage"]';
-        if (errorMessage) {
-            if (typeof showNotificationToast !== 'undefined') {
-                showNotificationToast(errorMessage, 'danger');
-            } else if (typeof toastr !== 'undefined') {
-                toastr.error(errorMessage);
+        // Wait for the document to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            var errorMessage = '@TempData["ErrorMessage"]';
+            if (errorMessage) {
+                showNotification(errorMessage, 'error');
             }
-        }
+
+            // Form submission handler
+            document.getElementById('registerForm').addEventListener('submit', function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Disable button to prevent double submission
+                const submitBtn = document.getElementById('registerBtn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Registering...';
+            });
+
+            // Real-time validation
+            document.getElementById('password').addEventListener('input', validatePassword);
+            document.getElementById('confirmpassword').addEventListener('input', validateConfirmPassword);
+
+            // Validate on blur as well
+            document.getElementById('password').addEventListener('blur', validatePassword);
+            document.getElementById('confirmpassword').addEventListener('blur', validateConfirmPassword);
+        });
 
         function togglePassword(inputId, iconElement) {
             const passwordInput = document.getElementById(inputId);
@@ -294,6 +381,86 @@
                 passwordInput.type = 'password';
                 icon.classList.remove('fa-eye');
                 icon.classList.add('fa-eye-slash');
+            }
+        }
+
+        function validatePassword() {
+            const password = document.getElementById('password');
+            const passwordWarning = document.getElementById('passwordWarning');
+            const passwordValue = password.value.trim();
+
+            if (passwordValue.length > 0 && passwordValue.length < 6) {
+                passwordWarning.style.display = 'block';
+                password.classList.add('input-error');
+                return false;
+            } else {
+                passwordWarning.style.display = 'none';
+                password.classList.remove('input-error');
+                return true;
+            }
+        }
+
+        function validateConfirmPassword() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmpassword');
+            const confirmPasswordValue = confirmPassword.value.trim();
+            const confirmPasswordWarning = document.getElementById('confirmPasswordWarning');
+
+            if (confirmPasswordValue.length > 0 && password !== confirmPasswordValue) {
+                confirmPasswordWarning.style.display = 'block';
+                confirmPassword.classList.add('input-error');
+                return false;
+            } else {
+                confirmPasswordWarning.style.display = 'none';
+                confirmPassword.classList.remove('input-error');
+                return true;
+            }
+        }
+
+        function validateForm() {
+            const password = document.getElementById('password').value.trim();
+            const confirmPassword = document.getElementById('confirmpassword').value.trim();
+
+            let isValid = true;
+            let errorMessage = '';
+
+            // Validate password length
+            if (password.length < 6) {
+                document.getElementById('passwordWarning').style.display = 'block';
+                document.getElementById('password').classList.add('input-error');
+                isValid = false;
+                errorMessage = 'Password must be at least 6 characters long';
+            }
+
+            // Validate password match
+            if (password !== confirmPassword) {
+                document.getElementById('confirmPasswordWarning').style.display = 'block';
+                document.getElementById('confirmpassword').classList.add('input-error');
+                isValid = false;
+                errorMessage = errorMessage || 'Passwords do not match';
+            }
+
+            // Show notification if there are errors
+            if (!isValid && errorMessage) {
+                showNotification(errorMessage, 'warning');
+            }
+
+            return isValid;
+        }
+
+        function showNotification(message, type) {
+            if (typeof showNotificationToast !== 'undefined') {
+                showNotificationToast(message, type);
+            } else if (typeof toastr !== 'undefined') {
+                if (type === 'error') {
+                    toastr.error(message);
+                } else if (type === 'warning') {
+                    toastr.warning(message);
+                } else {
+                    toastr.info(message);
+                }
+            } else {
+                alert(message);
             }
         }
     </script>
