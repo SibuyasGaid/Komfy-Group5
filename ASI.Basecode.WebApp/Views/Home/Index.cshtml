@@ -384,7 +384,7 @@
 </div>
 
 <!-- Analytics Section -->
-@if (User.IsInRole("Admin"))
+@if (User.IsInRole("Admin") || User.IsInRole("Member"))
 {
     <div class="animate-fade-in-up stagger-4">
         <h2 class="kozy-section-title">Library Analytics</h2>
@@ -458,7 +458,8 @@
             </div>
 
             <!-- Top Borrowers -->
-            <div class="kozy-stat-card">
+            @if(User.IsInRole("Admin")){
+<div class="kozy-stat-card">
                 <div class="kozy-stat-header">
                     <h3 class="kozy-stat-title">Top Borrowers</h3>
                     <div class="kozy-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">
@@ -487,6 +488,8 @@
                     }
                 </ul>
             </div>
+            }
+            
         </div>
     </div>
 }
