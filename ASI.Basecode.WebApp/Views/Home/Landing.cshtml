@@ -131,6 +131,15 @@
         max-height: none !important;
     }
 
+        /* Success state for inputs (subtle green outline) */
+        .kozy-form-input.success {
+            border-color: #16A34A;
+            box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.06);
+        }
+
+        /* Screen-reader only utility */
+        .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
     .kozy-landing {
         min-height: 100vh;
         max-height: fit-content;
@@ -1703,10 +1712,11 @@
             
             <form id="loginForm" method="post" action="/Account/Login">
                 @Html.AntiForgeryToken()
+                <div id="loginServerError" class="kozy-error-message" role="alert" style="margin-bottom:0.75rem;"></div>
                 <div class="kozy-form-group">
-                    <label class="kozy-form-label" for="loginUserId">@UserId</label>
+                    <label class="kozy-form-label" for="loginUserId">Username</label>
                     <div class="kozy-form-input-wrapper">
-                        <input type="text" id="loginUserId" name="UserId" class="kozy-form-input" placeholder="Enter userid" required />
+                        <input type="text" id="loginUserId" name="UserId" class="kozy-form-input" placeholder="Enter username" autocomplete="username" required />
                     </div>
                     <span class="kozy-error-message" id="loginUserIdError"></span>
                 </div>
@@ -1761,11 +1771,13 @@
             <form id="registerForm" method="post" action="/Account/Register">
                 @Html.AntiForgeryToken()
                 <div class="kozy-form-group">
-                    <label class="kozy-form-label" for="registerUserId">User ID</label>
+                    <label class="kozy-form-label" for="registerUserId">Username</label>
                     <div class="kozy-form-input-wrapper">
-                        <input type="text" id="registerUserId" name="UserId" class="kozy-form-input" placeholder="Enter userid" required />
+                        <input type="text" id="registerUserId" name="UserId" class="kozy-form-input" placeholder="Enter username" autocomplete="username" required />
                     </div>
                     <span class="kozy-error-message" id="registerUserIdError"></span>
+                    <div id="registerUserIdAvailability" style="margin-top:0.25rem; font-size:0.9rem; color:#6B7280; display:block;"></div>
+                    <div id="landingAriaLive" class="sr-only" aria-live="polite"></div>
                 </div>
                 
                 <div class="kozy-form-group">
@@ -1782,6 +1794,7 @@
                         <input type="email" id="registerEmail" name="Email" class="kozy-form-input" placeholder="Enter email" required />
                     </div>
                     <span class="kozy-error-message" id="registerEmailError"></span>
+                    <div id="registerEmailAvailability" style="margin-top:0.25rem; font-size:0.9rem; color:#6B7280; display:block;"></div>
                 </div>
                 
                 <div class="kozy-form-group">
@@ -2292,7 +2305,9 @@
                     
                     // Check for validation errors
                     const errors = doc.querySelectorAll('.text-danger, .field-validation-error');
+                    let hadFieldError = false;
                     if (errors.length > 0) {
+                        hadFieldError = true;
                         errors.forEach(error => {
                             const fieldName = error.getAttribute('data-valmsg-for') || error.previousElementSibling?.getAttribute('for');
                             if (fieldName) {
@@ -2304,15 +2319,19 @@
                             }
                         });
                     }
-                    
-                    // Check for TempData error message
-                    const errorMessage = doc.querySelector('.text-danger')?.textContent || 
-                                       doc.body.textContent.match(/Incorrect UserId or Password/i);
-                    if (errorMessage) {
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'kozy-error-message';
-                        errorDiv.textContent = typeof errorMessage === 'string' ? errorMessage : 'Incorrect UserId or Password';
-                        form.insertBefore(errorDiv, form.firstChild);
+
+                    // Also check for our server-rendered validation summary (class used in Account/Login.cshtml)
+                    const serverSummary = doc.querySelector('.kozy-validation-error');
+                    const loginServerError = document.getElementById('loginServerError');
+                    if (serverSummary && loginServerError) {
+                        // If there were no field-level errors, show the summary message in the modal
+                        loginServerError.textContent = serverSummary.textContent.trim();
+                    } else if (!hadFieldError && !serverSummary) {
+                        // As a fallback, look for any element with role="alert" in the returned HTML
+                        const alertEl = doc.querySelector('[role="alert"]');
+                        if (alertEl && loginServerError) {
+                            loginServerError.textContent = alertEl.textContent.trim();
+                        }
                     }
                 }
             } catch (error) {
@@ -2381,14 +2400,7 @@
                         });
                     }
                     
-                    // Check for TempData error message
-                    const errorMessage = doc.querySelector('.text-danger')?.textContent;
-                    if (errorMessage) {
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'kozy-error-message';
-                        errorDiv.textContent = errorMessage.trim();
-                        form.insertBefore(errorDiv, form.firstChild);
-                    }
+                    // No top-level error insertion here; field-level errors are displayed inline above.
                 }
             } catch (error) {
                 console.error('Register error:', error);
@@ -2401,5 +2413,136 @@
                 submitButton.textContent = originalText;
             }
         });
+
+        // Real-time username availability for register modal
+        (function() {
+            const registerUserId = document.getElementById('registerUserId');
+            const registerAvail = document.getElementById('registerUserIdAvailability');
+            const registerError = document.getElementById('registerUserIdError');
+            const registerFormBtn = document.querySelector('#registerForm button[type="submit"]');
+            let debounce = null;
+            let usernameIsAvailable = false;
+
+            if (!registerUserId || !registerAvail || !registerFormBtn) return;
+
+            // Start disabled until a successful check and min length met
+            registerFormBtn.disabled = true;
+
+            function setTaken(msg) {
+                registerAvail.style.color = '#DC2626';
+                registerAvail.textContent = msg;
+                registerUserId.classList.add('invalid');
+                registerUserId.classList.remove('success');
+                const live = document.getElementById('landingAriaLive'); if (live) live.textContent = msg;
+                usernameIsAvailable = false;
+                registerFormBtn.disabled = true;
+            }
+
+            function setTooShort(msg) {
+                registerAvail.style.color = '#DC2626';
+                registerAvail.textContent = msg;
+                registerUserId.classList.add('invalid');
+                registerUserId.classList.remove('success');
+                const live = document.getElementById('landingAriaLive'); if (live) live.textContent = msg;
+                usernameIsAvailable = false;
+                registerFormBtn.disabled = true;
+            }
+
+            function setAvailable(msg) {
+                // success state: subtle outline, no success text
+                registerAvail.textContent = '';
+                registerUserId.classList.remove('invalid');
+                registerUserId.classList.add('success');
+                const live = document.getElementById('landingAriaLive'); if (live) live.textContent = 'Username available';
+                usernameIsAvailable = true;
+                registerFormBtn.disabled = false;
+            }
+
+            function setNeutral(msg) {
+                registerAvail.style.color = '#6B7280';
+                registerAvail.textContent = msg || '';
+                // do not touch server-side validation span here — leave it for server messages
+                usernameIsAvailable = false;
+                registerFormBtn.disabled = true;
+            }
+
+            registerUserId.addEventListener('input', function() {
+                const v = this.value.trim();
+                if (debounce) clearTimeout(debounce);
+                registerAvail.textContent = '';
+                if (!v) { setNeutral(''); return; }
+                if (v.length < 6) { setTooShort('Username must be at least 6 characters.'); return; }
+                // mark as pending (disable)
+                registerFormBtn.disabled = true;
+                debounce = setTimeout(function() {
+                    fetch('@Url.Action("IsUsernameAvailable", "Account")?username=' + encodeURIComponent(v), { method: 'GET' })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data && data.available === true) setAvailable('Username is available');
+                            else setTaken('Username is already taken');
+                        })
+                        .catch(err => { console.error('Username check error', err); setNeutral('Unable to verify username'); });
+                }, 400);
+            });
+        })();
+
+        // Email format + availability check for register modal
+        (function() {
+            const registerEmail = document.getElementById('registerEmail');
+            const registerEmailAvail = document.getElementById('registerEmailAvailability');
+            const registerEmailError = document.getElementById('registerEmailError');
+            const registerFormBtn2 = document.querySelector('#registerForm button[type="submit"]');
+            let emailDebounce = null;
+
+            if (!registerEmail || !registerEmailAvail || !registerFormBtn2) return;
+
+            function isValidEmailFormat(e) {
+                // Simple, practical regex for client-side validation using RegExp constructor and unicode escape for the at-sign to avoid Razor parsing issues
+                return new RegExp('^[^\\s\\u0040]+\\u0040[^\\s\\u0040]+\\.[^\\s\\u0040]+$').test(e);
+            }
+
+            function setEmailInvalid(msg) {
+                registerEmailAvail.style.color = '#DC2626';
+                registerEmailAvail.textContent = msg;
+                registerEmail.classList.add('invalid');
+                registerFormBtn2.disabled = true;
+            }
+
+            function setEmailAvailable(msg) {
+                // success state: subtle outline, no success text
+                registerEmailAvail.textContent = '';
+                registerEmail.classList.remove('invalid');
+                registerEmail.classList.add('success');
+                const live = document.getElementById('landingAriaLive'); if (live) live.textContent = 'Email available';
+                // Enable the submit button; other checks (username) may still control it
+                registerFormBtn2.disabled = false;
+            }
+
+            function setEmailNeutral(msg) {
+                registerEmailAvail.style.color = '#6B7280';
+                registerEmailAvail.textContent = msg || '';
+                // do not touch server-side validation span here
+                registerFormBtn2.disabled = true;
+            }
+
+            registerEmail.addEventListener('input', function() {
+                const v = this.value.trim();
+                if (emailDebounce) clearTimeout(emailDebounce);
+                registerEmailAvail.textContent = '';
+                if (!v) { setEmailNeutral(''); return; }
+                if (!isValidEmailFormat(v)) { setEmailInvalid('Invalid email address format.'); return; }
+                // format ok — check availability
+                registerFormBtn2.disabled = true;
+                emailDebounce = setTimeout(function() {
+                    fetch('@Url.Action("IsEmailAvailable", "Account")?email=' + encodeURIComponent(v), { method: 'GET' })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data && data.available === true) setEmailAvailable('Email is available');
+                            else setEmailInvalid('Email is already taken');
+                        })
+                        .catch(err => { console.error('Email check error', err); setEmailNeutral('Unable to verify email'); });
+                }, 400);
+            });
+        })();
     </script>
 }

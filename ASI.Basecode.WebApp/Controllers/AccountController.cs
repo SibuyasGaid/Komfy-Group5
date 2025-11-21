@@ -107,9 +107,11 @@ namespace ASI.Basecode.WebApp.Controllers
             }
             else
             {
-                // Authentication failed
-                TempData["ErrorMessage"] = "Incorrect UserId or Password";
-                return View();
+                // Authentication failed - add model-level error and return view with model so UI shows inline messages
+                ModelState.AddModelError(string.Empty, "Incorrect username or password");
+                // keep TempData for backward-compatible toast systems or JS handlers
+                TempData["ErrorMessage"] = "Incorrect username or password";
+                return View(model);
             }
         }
 
@@ -124,20 +126,91 @@ namespace ASI.Basecode.WebApp.Controllers
         [AllowAnonymous]
         public IActionResult Register(UserViewModel model)
         {
+            // Validate server-side constraints (e.g., MinLength attributes)
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             try
             {
                 _userService.AddUser(model);
                 return RedirectToAction("Login", "Account");
             }
-            catch(InvalidDataException ex)
+            catch (InvalidDataException ex)
             {
-                TempData["ErrorMessage"] = ex.Message;
+                // Map known invalid-data errors to field-level validation so the UI shows inline errors
+                var msg = ex.Message ?? "";
+
+                if (msg.IndexOf("email", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    ModelState.AddModelError(nameof(model.Email), msg);
+                }
+                else if (msg.Equals(Resources.Messages.Errors.UserExists, System.StringComparison.OrdinalIgnoreCase) ||
+                         msg.IndexOf("userid", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    ModelState.AddModelError(nameof(model.UserId), msg);
+                }
+                else
+                {
+                    // General model error
+                    ModelState.AddModelError(string.Empty, msg);
+                }
+
+                // Return the same model so field-level messages render in the view
+                return View(model);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = Resources.Messages.Errors.ServerError;
             }
-            return View();
+
+            return View(model);
+        }
+
+        // AJAX endpoint: check if email is available (used by client-side registration UX)
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult IsEmailAvailable(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return Json(new { available = false });
+            }
+
+            try
+            {
+                // Service returns null when not found
+                var existing = _userService.GetUserByEmail(email);
+                return Json(new { available = existing == null });
+            }
+            catch (System.Exception ex)
+            {
+                _logger?.LogError(ex, "Error checking email availability");
+                return Json(new { available = false });
+            }
+        }
+
+        // AJAX endpoint: check if username is available (used by client-side registration UX)
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult IsUsernameAvailable(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                return Json(new { available = false });
+            }
+
+            try
+            {
+                var existing = _userService.GetUserDetails(username);
+                return Json(new { available = existing == null });
+            }
+            catch (System.Exception ex)
+            {
+                _logger?.LogError(ex, "Error checking username availability");
+                return Json(new { available = false });
+            }
         }
 
         /// <summary>
