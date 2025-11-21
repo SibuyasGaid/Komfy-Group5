@@ -470,7 +470,7 @@
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
                     <!-- Light Theme -->
-                    <div class="theme-option" data-theme="light" style="border: 2px solid @(ViewBag.CurrentTheme == "light" ? "#FF8223" : "#E5E7EB"); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease; background: @(ViewBag.CurrentTheme == "light" ? "rgba(255, 130, 35, 0.05)" : "white");">
+                    <div class="theme-option" data-theme="light" style="border: 2px solid #E5E7EB; border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease; background: white;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                             <h3 style="font-weight: 600; color: #2F3030; margin: 0;">Light Mode</h3>
                             <i class="fa-solid fa-sun" style="font-size: 1.5rem; color: #F59E0B;"></i>
@@ -483,7 +483,7 @@
                     </div>
 
                     <!-- Dark Theme -->
-                    <div class="theme-option" data-theme="dark" style="border: 2px solid @(ViewBag.CurrentTheme == "dark" ? "#FF8223" : "#E5E7EB"); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease; background: @(ViewBag.CurrentTheme == "dark" ? "rgba(255, 130, 35, 0.05)" : "white");">
+                    <div class="theme-option" data-theme="dark" style="border: 2px solid #E5E7EB; border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease; background: white;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                             <h3 style="font-weight: 600; color: #2F3030; margin: 0;">Dark Mode</h3>
                             <i class="fa-solid fa-moon" style="font-size: 1.5rem; color: #2A5C55;"></i>
@@ -551,6 +551,22 @@
         checkFormChanges();
     }
 
+    // Initialize theme on page load
+    const currentCookieTheme = document.cookie.split('; ').find(row => row.startsWith('theme='));
+    const currentTheme = currentCookieTheme ? currentCookieTheme.split('=')[1] : 'light';
+
+    // Update theme option UI based on current theme
+    document.querySelectorAll('.theme-option').forEach(opt => {
+        const optTheme = opt.getAttribute('data-theme');
+        if (optTheme === currentTheme) {
+            opt.style.borderColor = '#FF8223';
+            opt.style.background = 'rgba(255, 130, 35, 0.05)';
+        } else {
+            opt.style.borderColor = '#E5E7EB';
+            opt.style.background = 'white';
+        }
+    });
+
     // Theme switching
     document.querySelectorAll('.theme-option').forEach(option => {
         option.addEventListener('click', function() {
@@ -570,20 +586,36 @@
 
             fetch('@Url.Action("SetTheme", "Profile")', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'same-origin'
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Apply theme immediately
                     if (selectedTheme === 'dark') {
                         document.documentElement.classList.add('dark-theme');
+                        // Store in cookie for persistence
+                        document.cookie = `theme=dark; path=/; max-age=${60*60*24*365}`;
                     } else {
                         document.documentElement.classList.remove('dark-theme');
+                        // Store in cookie for persistence
+                        document.cookie = `theme=light; path=/; max-age=${60*60*24*365}`;
                     }
 
                     if (typeof showNotificationToast !== 'undefined') {
                         showNotificationToast('Theme changed successfully!', 'success');
                     }
+                } else {
+                    if (typeof showNotificationToast !== 'undefined') {
+                        showNotificationToast('Failed to change theme', 'danger');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (typeof showNotificationToast !== 'undefined') {
+                    showNotificationToast('Error changing theme', 'danger');
                 }
             });
         });
