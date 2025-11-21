@@ -2395,6 +2395,15 @@
                                 const errorElement = document.getElementById('register' + fieldName.charAt(0).toUpperCase() + fieldName.slice(1) + 'Error');
                                 if (errorElement) {
                                     errorElement.textContent = error.textContent.trim();
+                                    // Clear the availability hint for this field to avoid duplicate messages
+                                    try {
+                                        const lower = fieldName.toLowerCase();
+                                        if (lower === 'userid' || lower === 'userId'.toLowerCase()) {
+                                            const avail = document.getElementById('registerUserIdAvailability'); if (avail) avail.textContent = '';
+                                        } else if (lower === 'email') {
+                                            const avail = document.getElementById('registerEmailAvailability'); if (avail) avail.textContent = '';
+                                        }
+                                    } catch (e) { /* ignore */ }
                                 }
                             }
                         });
@@ -2453,6 +2462,8 @@
                 registerAvail.textContent = '';
                 registerUserId.classList.remove('invalid');
                 registerUserId.classList.add('success');
+                // clear any server-side validation message for this field
+                const serverSpan = document.getElementById('registerUserIdError'); if (serverSpan) serverSpan.textContent = '';
                 const live = document.getElementById('landingAriaLive'); if (live) live.textContent = 'Username available';
                 usernameIsAvailable = true;
                 registerFormBtn.disabled = false;
@@ -2513,6 +2524,8 @@
                 registerEmailAvail.textContent = '';
                 registerEmail.classList.remove('invalid');
                 registerEmail.classList.add('success');
+                // clear any server-side validation message for this field
+                const serverEmailSpan = document.getElementById('registerEmailError'); if (serverEmailSpan) serverEmailSpan.textContent = '';
                 const live = document.getElementById('landingAriaLive'); if (live) live.textContent = 'Email available';
                 // Enable the submit button; other checks (username) may still control it
                 registerFormBtn2.disabled = false;

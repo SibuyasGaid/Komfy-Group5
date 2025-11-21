@@ -373,6 +373,8 @@
                     usernameInput.classList.add('success');
                     usernameInput.removeAttribute('aria-invalid');
                 }
+                // clear any server-side validation message for this field
+                if (usernameValidationSpan) usernameValidationSpan.textContent = '';
                 // announce to screen readers
                 if (registerAriaLive) registerAriaLive.textContent = 'Username is available';
                 window.__updateRegisterBtn();
@@ -461,6 +463,8 @@
                     emailInput.classList.add('success');
                     emailInput.removeAttribute('aria-invalid');
                 }
+                // clear server-side validation span for Email
+                if (validationSpan) validationSpan.textContent = '';
                 if (registerAriaLive) registerAriaLive.textContent = 'Email is available';
                 window.__updateRegisterBtn();
             }
