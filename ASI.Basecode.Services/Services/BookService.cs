@@ -168,6 +168,8 @@ namespace ASI.Basecode.Services.Services
                 EbookPath = b.EbookPath,
                 ViewCount = b.ViewCount,
                 BorrowCount = b.BorrowCount,
+                Quantity = b.Quantity,
+                AvailableQuantity = b.AvailableQuantity,
                 AverageRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0,
                 ReviewCount = b.Reviews.Count
             }).ToList();
@@ -231,6 +233,8 @@ namespace ASI.Basecode.Services.Services
                 EbookPath = book.EbookPath,
                 ViewCount = book.ViewCount,
                 BorrowCount = book.BorrowCount,
+                Quantity = book.Quantity,
+                AvailableQuantity = book.AvailableQuantity,
                 AverageRating = book.Reviews.Any() ? book.Reviews.Average(r => r.Rating) : 0,
                 ReviewCount = book.Reviews.Count
             };
@@ -256,6 +260,8 @@ namespace ASI.Basecode.Services.Services
                 EbookPath = b.EbookPath,
                 ViewCount = b.ViewCount,
                 BorrowCount = b.BorrowCount,
+                Quantity = b.Quantity,
+                AvailableQuantity = b.AvailableQuantity,
                 AverageRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0,
                 ReviewCount = b.Reviews.Count
             }).ToList();
@@ -281,6 +287,8 @@ namespace ASI.Basecode.Services.Services
                 EbookPath = b.EbookPath,
                 ViewCount = b.ViewCount,
                 BorrowCount = b.BorrowCount,
+                Quantity = b.Quantity,
+                AvailableQuantity = b.AvailableQuantity,
                 AverageRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0,
                 ReviewCount = b.Reviews.Count
             }).ToList();
@@ -308,6 +316,8 @@ namespace ASI.Basecode.Services.Services
                 EbookPath = b.EbookPath,
                 ViewCount = b.ViewCount,
                 BorrowCount = b.BorrowCount,
+                Quantity = b.Quantity,
+                AvailableQuantity = b.AvailableQuantity,
                 AverageRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0,
                 ReviewCount = b.Reviews.Count
             }).ToList();
@@ -347,6 +357,8 @@ namespace ASI.Basecode.Services.Services
                 EbookPath = b.EbookPath,
                 ViewCount = b.ViewCount,
                 BorrowCount = b.BorrowCount,
+                Quantity = b.Quantity,
+                AvailableQuantity = b.AvailableQuantity,
                 AverageRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0,
                 ReviewCount = b.Reviews.Count
             }).ToList();
