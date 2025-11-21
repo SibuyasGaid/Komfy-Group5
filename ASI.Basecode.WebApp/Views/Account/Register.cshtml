@@ -198,6 +198,33 @@
                 font-size: 2.5rem;
             }
         }
+        .kozy-form-input.invalid {
+            border-color: #DC2626;
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.06);
+        }
+
+        .kozy-validation-error {
+            color: #DC2626;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        .kozy-form-input.success {
+            border-color: #16A34A;
+            box-shadow: 0 0 0 4px rgba(22,163,74,0.06);
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
     </style>
 }
 <div class="kozy-login-container">
@@ -209,13 +236,15 @@
             </div>
             
             <form method="post" action="/Account/Register">
+                <div id="registerAriaLive" class="sr-only" aria-live="polite"></div>
                 <div class="kozy-form-group">
-                    <label class="kozy-form-label" for="userId">User ID</label>
+                    <label class="kozy-form-label" for="userId">Username</label>
                     <div class="kozy-form-input-wrapper">
                         <input type="text" id="userId" class="kozy-form-input"
-                               asp-for="UserId" placeholder="Enter userid" />
+                               asp-for="UserId" placeholder="Enter username" autocomplete="username" />
                     </div>
                     <span asp-validation-for="UserId" class="text-danger"></span>
+                    <div id="usernameAvailability" style="margin-top:0.25rem; font-size:0.9rem; color:#6B7280; display:block;"></div>
                 </div>
                 
                 <div class="kozy-form-group">
@@ -231,9 +260,10 @@
                     <label class="kozy-form-label" for="email">Email</label>
                     <div class="kozy-form-input-wrapper">
                         <input type="email" id="email" class="kozy-form-input"
-                               asp-for="Email" placeholder="Enter email" />
+                               asp-for="Email" placeholder="Enter email" autocomplete="email" />
                     </div>
                     <span asp-validation-for="Email" class="text-danger"></span>
+                    <div id="emailAvailability" style="margin-top:0.45rem; font-size:0.9rem; color:#6B7280; display:block;"></div>
                 </div>
                 
                 <div class="kozy-form-group">
@@ -258,7 +288,7 @@
                     <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                 </div>
                 
-                <button class="kozy-btn-register" type="submit">
+                <button id="registerBtn" class="kozy-btn-register" type="submit">
                     Register
                 </button>
                 
@@ -296,5 +326,203 @@
                 icon.classList.add('fa-eye-slash');
             }
         }
+
+        // Shared button state helper for register page
+        window.__regUsernameAvailable = false;
+        window.__regEmailAvailable = false;
+        window.__updateRegisterBtn = function() {
+            const btn = document.getElementById('registerBtn');
+            if (!btn) return;
+            if (window.__regUsernameAvailable && window.__regEmailAvailable) {
+                btn.disabled = false;
+                btn.classList.remove('disabled');
+            } else {
+                btn.disabled = true;
+                btn.classList.add('disabled');
+            }
+        };
+
+        const registerAriaLive = document.getElementById('registerAriaLive');
+
+        // Debounced username availability check with inline field error handling
+        (function() {
+            const usernameInput = document.getElementById('userId');
+            const usernameAvailEl = document.getElementById('usernameAvailability');
+            const registerBtn2 = document.getElementById('registerBtn');
+            const usernameValidationSpan = document.querySelector('[data-valmsg-for="UserId"]');
+            let usernameDebounce = null;
+
+            function setUsernameUnavailable(msg) {
+                usernameAvailEl.style.color = '#DC2626';
+                usernameAvailEl.textContent = msg;
+                window.__regUsernameAvailable = false;
+                if (usernameInput) {
+                    usernameInput.classList.remove('success');
+                    usernameInput.classList.add('invalid');
+                    usernameInput.setAttribute('aria-invalid', 'true');
+                }
+                window.__updateRegisterBtn();
+            }
+
+            function setUsernameAvailable(msg) {
+                // Clear visible positive message and use visual success outline + ARIA
+                usernameAvailEl.textContent = '';
+                window.__regUsernameAvailable = true;
+                if (usernameInput) {
+                    usernameInput.classList.remove('invalid');
+                    usernameInput.classList.add('success');
+                    usernameInput.removeAttribute('aria-invalid');
+                }
+                // announce to screen readers
+                if (registerAriaLive) registerAriaLive.textContent = 'Username is available';
+                window.__updateRegisterBtn();
+            }
+
+            function setUsernameNeutral(msg) {
+                usernameAvailEl.style.color = '#6B7280';
+                usernameAvailEl.textContent = msg || '';
+                window.__regUsernameAvailable = false;
+                if (usernameInput) {
+                    usernameInput.classList.remove('invalid');
+                    usernameInput.classList.remove('success');
+                    usernameInput.removeAttribute('aria-invalid');
+                }
+                // do not modify server-side validation span here; let server errors render into it
+                window.__updateRegisterBtn();
+            }
+
+            if (!usernameInput || !usernameAvailEl) {
+                // no username field present
+            } else {
+                // If server returned a ModelState error for UserId on first render, mark field invalid
+                if (usernameValidationSpan && usernameValidationSpan.textContent && usernameValidationSpan.textContent.trim().length > 0) {
+                    usernameInput.classList.add('invalid');
+                    usernameInput.setAttribute('aria-invalid', 'true');
+                    if (registerBtn2) registerBtn2.disabled = true;
+                }
+
+                usernameInput.addEventListener('input', function() {
+                    const value = this.value.trim();
+                    if (usernameDebounce) clearTimeout(usernameDebounce);
+                        usernameAvailEl.textContent = '';
+                        if (!value) { setUsernameNeutral(''); return; }
+                        if (value.length < 6) { 
+                            // too short - show hint and disable
+                            usernameAvailEl.style.color = '#DC2626';
+                            usernameAvailEl.textContent = 'Username must be at least 6 characters.';
+                            // hint element removed; show message in availability element instead
+                            if (registerBtn2) { registerBtn2.disabled = true; registerBtn2.classList.add('disabled'); }
+                            return;
+                        }
+                        usernameDebounce = setTimeout(function() {
+                            fetch('@Url.Action("IsUsernameAvailable", "Account")?username=' + encodeURIComponent(value), { method: 'GET' })
+                                .then(r => r.json())
+                                .then(data => {
+                                    if (data && data.available === true) setUsernameAvailable('Username is available');
+                                    else setUsernameUnavailable('Username is already taken');
+                                })
+                                .catch(err => { console.error('Username check error', err); setUsernameNeutral('Unable to verify username'); });
+                        }, 400);
+                });
+            }
+
+        })();
+
+        // Debounced email availability check with inline field error handling
+        (function() {
+            const emailInput = document.getElementById('email');
+            const availabilityEl = document.getElementById('emailAvailability');
+            const registerBtn = document.getElementById('registerBtn');
+            const validationSpan = document.querySelector('[data-valmsg-for="Email"]');
+            let debounceTimer = null;
+
+            function isValidEmailFormat(e) {
+                return new RegExp('^[^\\s\\u0040]+\\u0040[^\\s\\u0040]+\\.[^\\s\\u0040]+$').test(e);
+            }
+
+            function setUnavailable(msg) {
+                availabilityEl.style.color = '#DC2626'; // red
+                availabilityEl.textContent = msg;
+                window.__regEmailAvailable = false;
+                if (emailInput) {
+                    emailInput.classList.remove('success');
+                    emailInput.classList.add('invalid');
+                    emailInput.setAttribute('aria-invalid', 'true');
+                }
+                window.__updateRegisterBtn();
+            }
+
+            function setAvailable(msg) {
+                // Clear positive availability message — only show errors
+                availabilityEl.textContent = '';
+                window.__regEmailAvailable = true;
+                if (emailInput) {
+                    emailInput.classList.remove('invalid');
+                    emailInput.classList.add('success');
+                    emailInput.removeAttribute('aria-invalid');
+                }
+                if (registerAriaLive) registerAriaLive.textContent = 'Email is available';
+                window.__updateRegisterBtn();
+            }
+
+            function setNeutral(msg) {
+                availabilityEl.style.color = '#6B7280';
+                availabilityEl.textContent = msg || '';
+                window.__regEmailAvailable = false;
+                if (emailInput) {
+                    emailInput.classList.remove('invalid');
+                    emailInput.classList.remove('success');
+                    emailInput.removeAttribute('aria-invalid');
+                }
+                // do not modify server-side validation span here; leave server messages untouched
+                window.__updateRegisterBtn();
+            }
+
+            if (!emailInput || !availabilityEl || !registerBtn) return;
+
+            // If server returned a ModelState error for Email on first render, mark field invalid
+            if (validationSpan && validationSpan.textContent && validationSpan.textContent.trim().length > 0) {
+                emailInput.classList.add('invalid');
+                emailInput.setAttribute('aria-invalid', 'true');
+                window.__regEmailAvailable = false;
+                window.__updateRegisterBtn();
+            }
+
+            emailInput.addEventListener('input', function() {
+                const value = this.value.trim();
+                // clear previous state
+                if (debounceTimer) clearTimeout(debounceTimer);
+                // do not remove existing server-side message until we get a positive check
+                availabilityEl.textContent = '';
+
+                if (!value) {
+                    setNeutral('');
+                    return;
+                }
+
+                if (!isValidEmailFormat(value)) {
+                    setUnavailable('Invalid email address format.');
+                    return;
+                }
+
+                debounceTimer = setTimeout(function() {
+                    // call the server endpoint
+                    fetch('@Url.Action("IsEmailAvailable", "Account")?email=' + encodeURIComponent(value), { method: 'GET' })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data && data.available === true) {
+                                setAvailable('Email is available');
+                            } else {
+                                setUnavailable('Email is already taken');
+                            }
+                        })
+                        .catch(err => {
+                            // network or server error - don't block registration but show neutral message
+                            console.error('Email check error', err);
+                            setNeutral('Unable to verify email availability');
+                        });
+                }, 450);
+            });
+        })();
     </script>
 }
